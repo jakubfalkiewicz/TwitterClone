@@ -1,0 +1,60 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  height: 100%;
+  width: 100%;
+}
+
+.body-cont {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+}
+header,
+footer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-size: 30px;
+  flex-wrap: wrap;
+}
+form {
+  display: flex;
+  gap: 10px;
+  align-self: center;
+}
+form > button {
+  background-color: transparent;
+  border: none;
+  font-size: 20px;
+}
+#guess {
+  width: 100px;
+}
+input {
+  line-height: 1.5rem;
+  width: 50px;
+}
+
+header,
+footer {
+  height: 15%;
+  width: 100%;
+  background-color: beige;
+}
+main {
+  display: flex;
+  flex-direction: column;
+  height: 70%;
+  width: 100%;
+}
+.rounds {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  list-style: none;
+}

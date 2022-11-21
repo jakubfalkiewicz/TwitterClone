@@ -1,0 +1,11 @@
+{
+  "name": "mastermind",
+  "version": "0.1.0",
+  "description": "TCP-based Mastermind Game",
+  "main": "app.js",
+  "private": true,
+  "author": "",
+  "scripts": {
+    "start": "nodemon"
+  }
+}

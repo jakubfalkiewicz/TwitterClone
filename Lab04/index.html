@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Mastermind</title>
+  </head>
+  <body>
+    <div class="body-cont">
+      <header>
+        <div>Mastermind🤯</div>
+        <div>
+          <form class="gameForm">
+            <input type="text" id="size" placeholder="Size" />
+            <input type="text" id="dim" placeholder="Diment." />
+            <input type="text" id="max" placeholder="Max" />
+            <button class="newGame" type="submit">New game</button>
+          </form>
+        </div>
+      </header>
+      <main>
+        <form class="guessForm">
+          <input type="text" id="guess" placeholder="Take a guess" />
+          <button class="gameGuess" type="submit">Guess</button>
+        </form>
+        <ul class="rounds"></ul>
+      </main>
+      <!-- <footer>footer</footer> -->
+    </div>
+  </body>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="script.js"></script>
+</html>
