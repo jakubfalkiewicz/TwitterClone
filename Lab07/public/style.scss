@@ -1,0 +1,59 @@
+body {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .reg-log {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    margin-top: -20px;
+    > a {
+      text-decoration: none;
+      color: red;
+      padding: 5px;
+      border: 2px solid black;
+      border-radius: 20px;
+    }
+  }
+  #rooms{
+    position: fixed;
+    background-color: rgb(88, 88, 88);
+    color: white;
+    top: 0;
+    right: 0;
+  }
+  .users-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    .user-label {
+      display: flex;
+      gap: 100px;
+      .label {
+        font-size: 23px;
+      }
+    }
+    .user {
+      display: flex;
+      gap: 20px;
+      font-size: 19px;
+
+      > div,
+      > a {
+        text-decoration: none;
+        color: #000;
+        min-width: 150px;
+      }
+      .edit {
+        opacity: 0;
+        background-color: rgba(0, 174, 255, 0.63);
+      }
+      .delete {
+        opacity: 0;
+        background-color: rgba(255, 0, 0, 0.582);
+      }
+    }
+  }
+}

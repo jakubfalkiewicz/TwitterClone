@@ -1,0 +1,51 @@
+<div class="px-4 py-5 my-5 text-center">
+  <h1 class="display-5 fw-bold">Register Here</h1>
+  <div class="col-lg-3 mx-auto">
+    <form onSubmit="return false;">
+      <div class="mb-2">
+        <label for="login" class="form-label">Login</label>
+        <input
+          id="registerLogin"
+          type="text"
+          class="form-control"
+          name="login"
+          placeholder="Login"
+        />
+      </div>
+      <div class="mb-2">
+        <label for="password" class="form-label">Password</label>
+        <input
+          id="registerPassword"
+          type="password"
+          class="form-control"
+          name="password"
+          placeholder="Password"
+        />
+      </div>
+      <div class="mb-2">
+        <label for="Email" class="form-label">Email (optional)</label>
+        <input
+          id="registerEmail"
+          type="Email"
+          class="form-control"
+          name="Email"
+          placeholder="Email"
+        />
+      </div>
+      <button id="button" class="btn btn-primary mt-2">Submit</button>
+    </form>
+  </div>
+</div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  function registerUser() {const userLogin =
+  document.getElementById("registerLogin").value; const userPassword =
+  document.getElementById("registerPassword").value; const userEmail =
+  document.getElementById("registerEmail").value;
+  axios.post(`http://localhost:3000/users/register`, {login: userLogin,
+  password: userPassword, email: userEmail}).then(res => {location.href =
+  `http://localhost:3000/profile/${res.data._id}`;
+  sessionStorage.setItem("loggedId", `${res.data._id}`);}).catch(err =>
+  console.log(err)); }; const button = document.getElementById("button");
+  button.addEventListener("click", () => registerUser());
+</script>

@@ -1,0 +1,51 @@
+body {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+body .reg-log {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  margin-top: -20px;
+}
+body .reg-log > a {
+  text-decoration: none;
+  color: red;
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 20px;
+}
+body .users-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+body .users-container .user-label {
+  display: flex;
+  gap: 100px;
+}
+body .users-container .user-label .label {
+  font-size: 23px;
+}
+body .users-container .user {
+  display: flex;
+  gap: 20px;
+  font-size: 19px;
+}
+body .users-container .user > div,
+body .users-container .user > a {
+  text-decoration: none;
+  color: #000;
+  min-width: 150px;
+}
+body .users-container .user .edit {
+  opacity: 0;
+  background-color: rgba(0, 174, 255, 0.63);
+}
+body .users-container .user .delete {
+  opacity: 0;
+  background-color: rgba(255, 0, 0, 0.582);
+}/*# sourceMappingURL=style.css.map */
