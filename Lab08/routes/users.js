@@ -70,7 +70,6 @@ router.put("/:userId", async (req, res) => {
   const update = {
     login: req.body.login || user.login,
     email: req.body.email || user.email,
-    admin: req.body.admin || user.admin,
   };
   const updatedUser = await User.findByIdAndUpdate(filter, update);
   return res.send({ updatedUser: updatedUser });

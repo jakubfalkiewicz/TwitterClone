@@ -3,7 +3,7 @@ function registerUser() {
   const userPassword = document.getElementById("registerPassword").value;
   const userEmail = document.getElementById("registerEmail").value;
   axios
-    .post(`/users/register`, {
+    .post(`/api/users/register`, {
       login: userLogin,
       password: userPassword,
       email: userEmail,

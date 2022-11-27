@@ -1,10 +1,50 @@
+const rooms = document.getElementById("roomList");
+const newRoom = document.getElementById("addNewRoom");
+const roomName = document.getElementById("newRoomName");
+const logged = sessionStorage.getItem("loggedId");
+const roomList = document.getElementById("roomList");
+var socket = io.connect();
+
+async function loadRooms() {
+  await axios.get("/api/rooms/").then((res) => {
+    res.data.forEach((e) => {
+      console.log(e);
+      const room = document.createElement("a");
+      room.setAttribute("href", `/rooms/${e._id}`);
+      room.innerHTML = e.name;
+      roomList.appendChild(room);
+    });
+  });
+}
+loadRooms();
+newRoom.addEventListener("click", async () => {
+  if (roomName.value != "" && logged) {
+    const newRoom = await axios
+      .post("/api/rooms/", {
+        name: roomName.value,
+        creator: logged,
+        messages: [],
+      })
+      .then((res) => res.data)
+      .catch((err) => console.log(err));
+    const room = document.createElement("a");
+    room.setAttribute("href", `/rooms/${newRoom._id}`);
+    room.innerHTML = roomName.value;
+    roomList.appendChild(room);
+    // socket.emit("join-room", roomName.value);
+    roomName.value = "";
+  }
+});
+socket.on("create-room", function (room) {
+  socket.join(room);
+});
+
 let data = sessionStorage.getItem("loggedId");
 async function loggedIsAdmin() {
-  await axios.get("http://localhost:3000/users/").then((response) => {
+  await axios.get("/users/").then((response) => {
     const admin = response.data.filter((el) => el._id === data.toString())[0]
       .admin;
-    const idMatch = document.getElementById(data);
-    if (admin || idMatch) {
+    if (admin) {
       document
         .querySelectorAll("button")
         .forEach((el) => (el.style.opacity = "1"));
@@ -14,13 +54,12 @@ async function loggedIsAdmin() {
 loggedIsAdmin();
 async function deleteUser(id) {
   await axios
-    .delete(`http://localhost:3000/users/${id}`)
+    .delete(`/users/${id}`)
     .then((response) => console.log(response.data))
     .catch((err) => console.log(err));
   const result = confirm("Are you sure?");
   if (result) {
     document.getElementById(id).remove();
-    location.href = `http://localhost:3000/`;
   }
 }
 function editUser(id) {
@@ -39,7 +78,7 @@ function editUser(id) {
   confirmButton.innerHTML = "SAVE";
   confirmButton.addEventListener("click", () => {
     axios
-      .put(`http://localhost:3000/users/${id}`, {
+      .put(`/users/${id}`, {
         email: document.getElementById(id).children[5].value,
         login: document.getElementById(id).children[4].value,
       })
