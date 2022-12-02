@@ -1,0 +1,39 @@
+<h1>Administration App: Home</h1>
+<div class="reg-log">
+  <a href="/register">REGISTER</a>
+  <a href="/login">LOGIN</a>
+</div>
+
+<div id="rooms">
+  <div>Rooms</div>
+  <ul id="roomList"></ul> 
+  <div>name</div>
+  <input value="" id="newRoomName"></input>
+   <div>password</div>
+  <input value="" id="newRoomPassword"></input>
+  <button id="addNewRoom">
+    NEW ROOM
+  </button>
+</div>
+
+<div class="users-container">
+  <div class="user-label">
+    <div class="label">LOGIN</div>
+    <div class="label">EMAIL</div>
+  </div>
+  {{#each users}}
+    <div class="user" id="{{this._id}}">
+      <a href="/profile/{{this._id}}">{{@login}}
+        {{this.login}}</a>
+      <div>{{@email}} {{this.email}}</div>
+      <button class="edit" onclick="editUser({{json this._id}})">EDIT</button>
+      <button
+        class="delete"
+        onclick="deleteUser({{json this._id}})"
+      >DELETE</button>
+    </div>
+  {{/each}}
+</div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/home.js"></script>

@@ -1,0 +1,17 @@
+<div class="users-container">
+  <div class="user-label">
+    <div class="label">LOGIN</div>
+    <div class="label">EMAIL</div>
+  </div>
+  <div class="user" id="{{user._id}}">
+    <div>{{user.login}}</div>
+    <div>{{user.email}}</div>
+    <button class="edit" onclick="editUser({{json user._id}})">EDIT</button>
+    <button
+      class="delete"
+      onclick="deleteUser({{json user._id}})"
+    >DELETE</button>
+  </div>
+</div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="/javascripts/user.js"></script>
