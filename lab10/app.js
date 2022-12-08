@@ -7,7 +7,7 @@ const app = Vue.createApp({
     return {
       playerHealth: 100,
       enemyHealth: 100,
-      singleAttack: 15,
+      singleAttack: 14,
       round: 1,
     };
   },
@@ -15,23 +15,28 @@ const app = Vue.createApp({
     enemyHealth(newHealth, oldHealth) {
       const logList = document.querySelector("ul");
       const log = document.createElement("li");
-      if (oldHealth > newHealth) {
-        log.innerHTML = `<div class="log--player">Gracz</div> zadał <div class="log--damage">${Math.abs(
-          newHealth - oldHealth
-        )}</div>pkt. obrażeń`;
+      const dmg = Math.abs(newHealth - oldHealth);
+      if (oldHealth >= newHealth) {
+        log.innerHTML = `<div class="log--player">Gracz</div> zadał <div class="log--damage">${dmg}</div>pkt. obrażeń`;
         logList.appendChild(log);
       }
     },
     playerHealth(newHealth, oldHealth) {
       const logList = document.querySelector("ul");
       const log = document.createElement("li");
-      console.log(this.round);
-      if (oldHealth > newHealth && this.round % 5 != 1) {
-        log.innerHTML = `<div class="log--opponent">Przeciwnik</div> zadał <div class="log--damage">${Math.abs(
-          newHealth - oldHealth
-        )}</div>pkt. obrażeń`;
+      const dmg = Math.abs(newHealth - oldHealth);
+      if (oldHealth >= newHealth && logList.childElementCount % 10 != 0) {
+        log.innerHTML = `<div class="log--opponent">Przeciwnik</div> zadał <div class="log--damage">${dmg}</div>pkt. obrażeń`;
         logList.appendChild(log);
       }
+    },
+    round(newRound, oldRound) {
+      newRound % 3 == 0
+        ? document.querySelector(".starcie").classList.remove("inactive")
+        : document.querySelector(".starcie").classList.add("inactive");
+      newRound % 5 == 0
+        ? document.querySelector(".restore").classList.remove("inactive")
+        : document.querySelector(".restore").classList.add("inactive");
     },
   },
   methods: {
@@ -53,9 +58,9 @@ const app = Vue.createApp({
     },
     playerAttack() {
       this.enemyHealth =
-        this.enemyHealth - Math.floor(Math.random() * this.singleAttack);
+        this.enemyHealth - Math.floor(Math.random() * this.singleAttack) - 1;
       this.playerHealth =
-        this.playerHealth - Math.floor(Math.random() * this.singleAttack);
+        this.playerHealth - Math.floor(Math.random() * this.singleAttack) - 1;
       const enemyHealthBar = (document.querySelector(
         ".enemyHealth"
       ).style.width = `${this.enemyHealth > 0 ? this.enemyHealth : 0}% `);
@@ -63,20 +68,18 @@ const app = Vue.createApp({
         ".playerHealth"
       ).style.width = `${this.playerHealth > 0 ? this.playerHealth : 0}%`);
       this.round++;
-      this.round % 3 == 0
-        ? document.querySelector(".starcie").classList.remove("inactive")
-        : document.querySelector(".starcie").classList.add("inactive");
-      this.round % 5 == 0
-        ? document.querySelector(".restore").classList.remove("inactive")
-        : document.querySelector(".restore").classList.add("inactive");
       this.checkWin();
     },
     playerSuperAttack() {
       if (this.round % 3 == 0) {
         this.enemyHealth =
-          this.enemyHealth - Math.floor(Math.random() * this.singleAttack * 2);
+          this.enemyHealth -
+          Math.floor(Math.random() * this.singleAttack * 2) +
+          1;
         this.playerHealth =
-          this.playerHealth - Math.floor(Math.random() * this.singleAttack * 2);
+          this.playerHealth -
+          Math.floor(Math.random() * this.singleAttack * 2) +
+          1;
         const enemyHealthBar = (document.querySelector(
           ".enemyHealth"
         ).style.width = `${this.enemyHealth > 0 ? this.enemyHealth : 0}%`);
@@ -90,8 +93,8 @@ const app = Vue.createApp({
     },
     playerRestore() {
       if (this.round % 5 == 0) {
-        const healing = Math.floor(Math.random() * this.singleAttack);
-        const damage = Math.floor(Math.random() * this.singleAttack);
+        const healing = Math.floor(Math.random() * this.singleAttack) + 1;
+        const damage = Math.floor(Math.random() * this.singleAttack) + 1;
         const logList = document.querySelector("ul");
         const log1 = document.createElement("li");
         log1.innerHTML = `<div class="log--player">Gracz</div> uleczył się o <div class="log--heal">${healing}</div>pkt. zdrowia`;
@@ -99,8 +102,7 @@ const app = Vue.createApp({
         const log2 = document.createElement("li");
         log2.innerHTML = `<div class="log--opponent">Przeciwnik</div> zadał <div class="log--damage">${damage}</div>pkt. obrażeń`;
         logList.appendChild(log2);
-        this.playerHealth = this.playerHealth + healing;
-        this.playerHealth = this.playerHealth - damage;
+        this.playerHealth = this.playerHealth + healing - damage;
         const playerHealthBar = (document.querySelector(
           ".playerHealth"
         ).style.width = `${this.playerHealth > 0 ? this.playerHealth : 0}%`);
