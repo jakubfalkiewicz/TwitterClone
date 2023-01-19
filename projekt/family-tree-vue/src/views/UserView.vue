@@ -25,9 +25,6 @@
       <div v-if="edit">Confirm</div>
     </button>
     <button v-if="edit && canEdit" @click="handleCancelEdit">Cancel</button>
-    <div>
-      <h2>Tree</h2>
-    </div>
     <div
       class="manageNode"
       :style="{
@@ -108,6 +105,17 @@
         <option value="male">Male</option>
         <option value="female">Female</option>
       </select>
+      <input
+        v-if="editNode && !addNode && nodeToAdd.type != null"
+        name="birthDate"
+        id="birthDate"
+        class="input"
+        type="date"
+        :value="nodeToAdd.birthDate"
+        min="1800-01-01"
+        max="2023-12-31"
+        @change="(e) => (nodeToAdd.birthDate = e.target.value)"
+      />
       <button v-if="!editNode" class="manage-button">Remove Person</button>
       <!-- <button v-if="addNode" class="manage-button">Partner</button> -->
       <input
@@ -135,18 +143,23 @@
       v-if="treeNodes && treeEdges && layout"
       :nodes="treeNodes"
       :edges="treeEdges"
+      v-model:selected-nodes="selectedNodes"
+      v-model:selected-edges="selectedEdges"
       :configs="configs"
       :layouts="layout"
     >
-      <template #edge-label="{ edge, ...slotProps }">
+      <!-- <template #edge-label="{ edge, ...slotProps }">
         <v-edge-label
           :text="edge.label"
           align="center"
           vertical-align="above"
           v-bind="slotProps"
         />
-      </template>
-      <template #override-node="slotProps">
+      </template> -->
+      <template
+        v-if="store.loggedUser._id == route.params.id"
+        #override-node="slotProps"
+      >
         <v-shape
           v-bind="slotProps"
           @click="customEventHandler(slotProps.nodeId, $event)"
@@ -168,6 +181,7 @@ const configs = vNG.defineConfigs({
     // scalingObjects: true,
   },
   edge: {
+    selectable: true,
     normal: {
       color: "#00000096",
       width: 3,
@@ -186,6 +200,8 @@ const configs = vNG.defineConfigs({
     },
   },
   node: {
+    selectable: 2,
+    draggable: false,
     normal: {
       type: "circle",
       color: (node) => node.color,
@@ -198,6 +214,7 @@ const configs = vNG.defineConfigs({
       color: "#fff",
       margin: 4,
       direction: "south",
+      directionAutoAdjustment: true,
       text: "name",
     },
   },
@@ -222,7 +239,11 @@ const nodeToAdd = ref({
   firstName: null,
   lastName: null,
   gender: null,
+  birthDate: null,
 });
+const selectedNodes = ref([]);
+const selectedEdges = ref([]);
+const selectedNodesValues = ref([]);
 
 function handleEdit() {
   if (edit.value == true) {
@@ -260,10 +281,9 @@ async function handleEditNode() {
             ? parseInt(selectedNode.value.generation) - 1
             : parseInt(selectedNode.value.generation) + 1,
         treeId: user.value._id,
-        birthDate: "Unknown",
       })
       .then((res) => {
-        console.log(selectedNode.value.gender);
+        console.log(res.data);
         if (nodeToAdd.value.type == "child") {
           axios
             .post(
@@ -307,7 +327,11 @@ function handleCancelEditNode() {
 
 function customEventHandler(nodeId, event) {
   selectedNode.value = treeNodes.value[nodeId];
-  console.log(selectedNode.value);
+  const selected = selectedNodes.value.reduce((prev, curr, index) => {
+    return [...prev, treeNodes.value[curr]];
+  }, []);
+  console.log(selected);
+  // console.log(treeNodes.value[selectedNodes.value[0]]);
   const eventInfo = {
     idIndex: parseInt(nodeId),
     type: event.type,
@@ -333,9 +357,13 @@ function formGraph() {
         name: `${el.firstName} \n${el.lastName}`,
         color: el.gender === "male" ? "lightskyblue" : "hotpink",
       }));
+    console.log(treeNodes.value);
     const findNode = (id) => {
-      return data.nodes.map((el) => el.id).indexOf(id);
+      return treeNodes.value.map((el) => el.id).indexOf(id);
     };
+    const nodes = data.nodes
+      .filter((node) => node.treeId === route.params.id)
+      .map((el) => el.id);
     treeEdges.value = data.edges
       .filter((edge) => edge.type !== "PARTNER")
       .map((el) => ({
@@ -343,8 +371,10 @@ function formGraph() {
         source: findNode(el.from),
         target: findNode(el.to),
         label: el.type.substring(3),
-      }));
-    const nodes = data.nodes.filter((node) => node.treeId === route.params.id);
+      }))
+      .filter((node) => nodes.includes(node.from) || nodes.includes(node.to));
+
+    console.log(treeEdges.value);
     const hasParent = (node) => {
       // console.log("NODEID: " + findNode(node.id));
       const dane = data.edges.filter(
@@ -366,7 +396,6 @@ function formGraph() {
       const result = list
         .filter((el) => el.gen == gen)
         .sort((a, b) => (a.x > b.x ? -1 : 1));
-      console.log(result);
       return result.length > 0 ? result[0].x + 100 : 0;
     }
     function setPosition() {
