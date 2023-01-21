@@ -101,7 +101,7 @@ export default {
     submit(values) {
       alert("success");
       console.log({ values });
-    },
+    }
   },
 };
 </script>

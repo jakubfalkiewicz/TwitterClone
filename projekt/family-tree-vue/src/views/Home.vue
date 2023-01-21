@@ -73,6 +73,10 @@ onMounted(() => {
 .searchbar {
   padding: 5px;
   font-size: 18px;
+  transition: 0.2s all ease;
+}
+.searchbar:hover {
+  border: 2px solid white;
 }
 h1 {
   margin: 10px;
@@ -93,6 +97,11 @@ h1 {
   border: 1px solid white;
   border-radius: 15px;
   padding: 9px;
-  margin: 10px;
+  margin: 7px;
+  transition: 0.3s all ease;
+}
+.user:hover {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.199);
 }
 </style>

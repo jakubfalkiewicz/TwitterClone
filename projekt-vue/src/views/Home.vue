@@ -19,9 +19,6 @@ onMounted(() => {
 <template>
   <h1>Home</h1>
   <div>UsersList: {{ store.usersList }}</div>
-  <div>Number: {{ store.number }}</div>
-  <button @click="store.getUsersList">Get users</button>
-  <button @click="store.increment()">Increment</button>
   <div v-for="post in store.usersList">
     <div>{{ post.username }}</div>
     <div>{{ post.email }}</div>

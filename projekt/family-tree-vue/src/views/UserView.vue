@@ -50,6 +50,20 @@
         Add Related
       </button>
       <button
+        v-if="edgeToAdd.type != null && edgeToAdd.type != 'DELETE'"
+        class="manage-button"
+        @click="addRelationship"
+      >
+        Add relationship
+      </button>
+      <button
+        v-if="edgeToAdd.type != null && edgeToAdd.type == 'DELETE'"
+        class="manage-button"
+        @click="delRelationship"
+      >
+        Del. relationship
+      </button>
+      <button
         v-if="addNode"
         class="manage-button"
         @click="
@@ -116,8 +130,9 @@
         max="2023-12-31"
         @change="(e) => (nodeToAdd.birthDate = e.target.value)"
       />
-      <button v-if="!editNode" class="manage-button">Remove Person</button>
-      <!-- <button v-if="addNode" class="manage-button">Partner</button> -->
+      <button v-if="!editNode" class="manage-button" @click="removePerson">
+        Remove Person
+      </button>
       <input
         type="text"
         class="input"
@@ -166,6 +181,10 @@
         />
       </template>
     </v-network-graph>
+    <div v-for="node in canClone">
+      <div>{{ node.firstName }} {{ node.lastName }} {{ node.birthDate }}</div>
+    </div>
+    <button v-if="canClone.length > 0">Clone tree</button>
   </div>
 </template>
 
@@ -241,9 +260,48 @@ const nodeToAdd = ref({
   gender: null,
   birthDate: null,
 });
+const edgeToAdd = ref({
+  type: null,
+  from: null,
+  to: null,
+});
 const selectedNodes = ref([]);
 const selectedEdges = ref([]);
-const selectedNodesValues = ref([]);
+const canClone = ref([]);
+
+async function addRelationship() {
+  console.log(edgeToAdd.value);
+  if (edgeToAdd.value.type == "IS_MOTHER")
+    await axios
+      .post(`http://localhost:5000/actors/addMother/${edgeToAdd.value.to}`, {
+        parentId: edgeToAdd.value.from,
+      })
+      .then(() => formGraph());
+  if (edgeToAdd.value.type == "IS_FATHER") {
+    await axios
+      .post(`http://localhost:5000/actors/addFather/${edgeToAdd.value.to}`, {
+        parentId: edgeToAdd.value.from,
+      })
+      .then(() => formGraph());
+  }
+}
+
+async function delRelationship() {
+  axios
+    .delete(`http://localhost:5000/actors/delRel`, {
+      data: {
+        parentId: edgeToAdd.value.from,
+        childId: edgeToAdd.value.to,
+      },
+    })
+    .then(() => formGraph());
+}
+
+function removePerson() {
+  axios
+    .delete(`http://localhost:5000/actors/${selectedNode.value.id}`)
+    .then(() => formGraph());
+}
 
 function handleEdit() {
   if (edit.value == true) {
@@ -327,10 +385,37 @@ function handleCancelEditNode() {
 
 function customEventHandler(nodeId, event) {
   selectedNode.value = treeNodes.value[nodeId];
+  console.log(selectedNode.value);
   const selected = selectedNodes.value.reduce((prev, curr, index) => {
-    return [...prev, treeNodes.value[curr]];
+    return [...prev, treeNodes.value[curr]].sort(function (a, b) {
+      return parseInt(a.generation) - parseInt(b.generation);
+    });
   }, []);
-  console.log(selected);
+  if (
+    selected.length == 2 &&
+    Math.abs(selected[0].generation - selected[1].generation) == 1
+  ) {
+    const edges = treeEdges.value.filter(
+      (el) =>
+        (el.from == selected[0].id || el.from == selected[1].id) &&
+        (el.to == selected[0].id || el.to == selected[1].id)
+    );
+    edgeToAdd.value.from = selected[1].id;
+    edgeToAdd.value.to = selected[0].id;
+    if (edges.length > 0) {
+      edgeToAdd.value.type = "DELETE";
+    } else {
+      selected[1].gender == "female"
+        ? (edgeToAdd.value.type = "IS_MOTHER")
+        : (edgeToAdd.value.type = "IS_FATHER");
+    }
+  } else {
+    edgeToAdd.value = {
+      type: null,
+      from: null,
+      to: null,
+    };
+  }
   // console.log(treeNodes.value[selectedNodes.value[0]]);
   const eventInfo = {
     idIndex: parseInt(nodeId),
@@ -357,7 +442,6 @@ function formGraph() {
         name: `${el.firstName} \n${el.lastName}`,
         color: el.gender === "male" ? "lightskyblue" : "hotpink",
       }));
-    console.log(treeNodes.value);
     const findNode = (id) => {
       return treeNodes.value.map((el) => el.id).indexOf(id);
     };
@@ -374,9 +458,7 @@ function formGraph() {
       }))
       .filter((node) => nodes.includes(node.from) || nodes.includes(node.to));
 
-    console.log(treeEdges.value);
     const hasParent = (node) => {
-      // console.log("NODEID: " + findNode(node.id));
       const dane = data.edges.filter(
         (edge) =>
           node.id == edge.to &&
@@ -384,14 +466,6 @@ function formGraph() {
       );
       return dane.length > 0 ? dane[0].from : false;
     };
-    function hasPartner(node) {
-      const dane = data.edges.filter(
-        (edge) => node.id === (edge.to || edge.from) && edge.type === "PARTNER"
-      );
-      if (dane.length > 0) {
-        return node.id === edge.to ? edge.from : edge.to;
-      }
-    }
     function lastOfGen(list, gen) {
       const result = list
         .filter((el) => el.gen == gen)
@@ -429,6 +503,62 @@ function formGraph() {
       };
     }
     setPosition();
+    const loggedUserTree = data.nodes.filter(
+      (el) => el.treeId == store.loggedUser._id
+    );
+    const sameNodes = treeNodes.value.reduce(
+      (prev, curr) => {
+        let obj = loggedUserTree.find(
+          (o) =>
+            o.firstName === curr.firstName &&
+            o.lastName === curr.lastName &&
+            o.birthDate === curr.birthDate
+        );
+        if (obj == undefined) {
+          return { ...prev, filtered: [...prev.filtered, curr] };
+        } else {
+          return { ...prev, same: [...prev.same, curr] };
+        }
+      },
+      { same: [], filtered: [] }
+    );
+    if (route.params.id !== store.loggedUser._id) {
+      canClone.value = sameNodes.same;
+      const randSame = loggedUserTree.find(
+        (o) =>
+          o.firstName === sameNodes.same[0].firstName &&
+          o.lastName === sameNodes.same[0].lastName &&
+          o.birthDate === sameNodes.same[0].birthDate
+      );
+      const generationDiff = randSame.generation - sameNodes.same[0].generation;
+      const sameIds = sameNodes.same.map((el) => el.id);
+      const edgesToClone = treeEdges.value.filter(
+        (el) => !(sameIds.includes(el.from) && sameIds.includes(el.to))
+      );
+      console.log(edgesToClone);
+      async function cloneTreeNodes() {
+        await sameNodes.filtered.reduce(async (prev, curr) => {
+          const newNode = await axios
+            .post("http://localhost:5000/actors/", {
+              ...curr,
+              generation: parseInt(curr.generation) + parseInt(generationDiff),
+              treeId: store.loggedUser._id,
+            })
+            .then((res) => {
+              return res.data;
+            });
+          console.log({
+            oldNode: curr.id,
+            newNode: newNode.id,
+          });
+        }, []);
+        console.log("CLONED");
+      }
+      //COPY NEW IDS AND CREATE RELS BASED ON OLD ONES
+      cloneTreeNodes();
+      console.log(sameNodes.filtered);
+      console.log(sameNodes.same);
+    }
   });
 }
 
