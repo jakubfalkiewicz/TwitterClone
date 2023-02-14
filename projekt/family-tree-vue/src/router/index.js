@@ -16,12 +16,22 @@ const routes = [
   {
     path: "/users/:id",
     name: "users",
+    component: () => import("@/components/FamilyTreeTable.vue"),
+  },
+  {
+    path: "/user/:id",
+    name: "user",
     component: () => import("@/views/UserView.vue"),
   },
   {
-    path: "/tree",
-    name: "tree",
-    component: () => import("@/views/FamilyTree.vue"),
+    path: "/chat/public",
+    name: "chat",
+    component: () => import("@/views/ChatView.vue"),
+  },
+  {
+    path: "/chat/:id",
+    name: "usersChat",
+    component: () => import("@/views/PrivateChat.vue"),
   },
 ];
 

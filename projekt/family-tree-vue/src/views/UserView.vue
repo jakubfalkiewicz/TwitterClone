@@ -1,7 +1,6 @@
 <template>
   <h2>User</h2>
   <div v-if="user" class="user-info-container">
-    <div>ID: {{ user._id }}</div>
     <div class="user-info">
       Username:
       <input
@@ -25,6 +24,13 @@
       <div v-if="edit">Confirm</div>
     </button>
     <button v-if="edit && canEdit" @click="handleCancelEdit">Cancel</button>
+    <button
+      v-if="loggedUser._id !== route.params.id"
+      @click="this.$router.push(`/chat/${route.params.id}`)"
+    >
+      Private message
+    </button>
+
     <div
       class="manageNode"
       :style="{
@@ -171,21 +177,22 @@
           v-bind="slotProps"
         />
       </template> -->
-      <template
-        v-if="store.loggedUser && store.loggedUser._id == route.params.id"
-        #override-node="slotProps"
-      >
+      <template #override-node="slotProps">
         <v-shape
           v-bind="slotProps"
           @click="customEventHandler(slotProps.nodeId, $event)"
         />
       </template>
     </v-network-graph>
-    <div v-for="node in canClone">
+    <!-- <div v-for="node in canClone">
       <div>{{ node.firstName }} {{ node.lastName }} {{ node.birthDate }}</div>
-    </div>
+    </div> -->
     <button
-      v-if="canClone.length > 0 && route.params.id !== user._id"
+      v-if="
+        store.loggedUsers.some((e) => e._id === loggedUser._id) &&
+        canClone.length > 0 &&
+        route.params.id !== loggedUser._id
+      "
       @click="cloneTreeNodes"
     >
       Clone tree
@@ -225,7 +232,7 @@ const configs = vNG.defineConfigs({
   },
   node: {
     selectable: 2,
-    draggable: false,
+    // draggable: false,
     normal: {
       type: "circle",
       color: (node) => node.color,
@@ -275,6 +282,7 @@ const selectedEdges = ref([]);
 const canClone = ref([]);
 const sameNodes = ref([]);
 const generationDiff = ref(null);
+const loggedUser = ref(null);
 
 async function addRelationship() {
   console.log(edgeToAdd.value);
@@ -309,13 +317,21 @@ function removePerson() {
     .delete(`http://localhost:5000/actors/${selectedNode.value.id}`)
     .then(() => formGraph());
 }
-
 function handleEdit() {
+  const list = store.usersList
+    .filter((e) => e._id !== user.value._id)
+    .find(
+      (o) => o.username === user.value.username || o.email === user.value.email
+    );
   if (edit.value == true) {
-    store.editUser(user.value).then((res) => {
-      if (res == true) {
-      }
-    });
+    !list &&
+      store.editUser(user.value).then((res) => {
+        if (res == true) {
+          console.log(user.value);
+          edit.value = !edit.value;
+        }
+      });
+    list && alert("Username or email already taken");
   } else {
     edit.value = !edit.value;
   }
@@ -348,7 +364,6 @@ async function handleEditNode() {
         treeId: user.value._id,
       })
       .then((res) => {
-        console.log(res.data);
         if (nodeToAdd.value.type == "child") {
           axios
             .post(
@@ -430,6 +445,7 @@ function customEventHandler(nodeId, event) {
     x: event.clientX,
     y: event.clientY,
   };
+  // console.log(eventInfo);
   if (event.type == "click") {
     heightDist.value = event.clientY;
     widthDist.value = event.clientX;
@@ -451,12 +467,14 @@ function formGraph() {
         name: `${el.firstName} \n${el.lastName}`,
         color: el.gender === "male" ? "lightskyblue" : "hotpink",
       }));
+    // console.log(treeNodes.value);
     const findNode = (id) => {
       return treeNodes.value.map((el) => el.id).indexOf(id);
     };
     const nodes = data.nodes
       .filter((node) => node.treeId === route.params.id)
       .map((el) => el.id);
+    // console.log(nodes);
     treeEdges.value = data.edges
       .map((el) => ({
         ...el,
@@ -465,15 +483,7 @@ function formGraph() {
         label: el.type.substring(3),
       }))
       .filter((node) => nodes.includes(node.from) || nodes.includes(node.to));
-
-    const hasParent = (node) => {
-      const dane = data.edges.filter(
-        (edge) =>
-          node.id == edge.to &&
-          (edge.type == "IS_FATHER" || edge.type == "IS_MOTHER")
-      );
-      return dane.length > 0 ? dane[0].from : false;
-    };
+    // console.log(treeEdges.value);
     function lastOfGen(list, gen) {
       const result = list
         .filter((el) => el.gen == gen)
@@ -482,27 +492,15 @@ function formGraph() {
     }
     function setPosition() {
       let positions = treeNodes.value.reduce((prev, curr, index) => {
-        if (hasParent(curr)) {
-          return [
-            ...prev,
-            {
-              id: curr.id,
-              gen: curr.generation,
-              x: lastOfGen(prev, curr.generation),
-              y: curr.generation * -150,
-            },
-          ];
-        } else {
-          return [
-            ...prev,
-            {
-              id: curr.id,
-              gen: curr.generation,
-              x: lastOfGen(prev, curr.generation),
-              y: curr.generation * -150,
-            },
-          ];
-        }
+        return [
+          ...prev,
+          {
+            id: curr.id,
+            gen: curr.generation,
+            x: lastOfGen(prev, curr.generation),
+            y: curr.generation * -150,
+          },
+        ];
       }, []);
       layout.value = {
         nodes: {
@@ -511,10 +509,11 @@ function formGraph() {
       };
     }
     setPosition();
-    const loggedUserTree = store.loggedUser
-      ? data.nodes.filter((el) => el.treeId == store.loggedUser._id)
+    const loggedUserTree = store.loggedUsers.some(
+      (e) => e._id === loggedUser.value._id
+    )
+      ? data.nodes.filter((el) => el.treeId == loggedUser.value._id)
       : [];
-    // console.log(loggedUserTree);
     sameNodes.value = treeNodes.value.reduce(
       (prev, curr) => {
         let obj = loggedUserTree.find(
@@ -528,7 +527,7 @@ function formGraph() {
         } else {
           edgesSet.push({
             oldNode: curr.id,
-            newNode: obj.id,
+            newNode: parseInt(obj.id),
           });
           return { ...prev, same: [...prev.same, curr] };
         }
@@ -536,12 +535,15 @@ function formGraph() {
       { same: [], filtered: [] }
     );
     canClone.value = sameNodes.value.same;
-    const randSame = loggedUserTree.find(
-      (o) =>
-        o.firstName === sameNodes.value.same[0].firstName &&
-        o.lastName === sameNodes.value.same[0].lastName &&
-        o.birthDate === sameNodes.value.same[0].birthDate
-    );
+    console.log(sameNodes.value);
+    const randSame =
+      sameNodes.value.same.length > 0 &&
+      loggedUserTree.find(
+        (o) =>
+          o.firstName === sameNodes.value.same[0].firstName &&
+          o.lastName === sameNodes.value.same[0].lastName &&
+          o.birthDate === sameNodes.value.same[0].birthDate
+      );
     generationDiff.value = randSame
       ? randSame.generation - sameNodes.value.same[0].generation
       : 0;
@@ -558,7 +560,7 @@ async function cloneTreeNodes() {
       .post("http://localhost:5000/actors/", {
         ...curr,
         generation: parseInt(curr.generation) + parseInt(generationDiff.value),
-        treeId: store.loggedUser._id,
+        treeId: loggedUser.value._id,
       })
       .then((res) => {
         return res.data;
@@ -569,10 +571,11 @@ async function cloneTreeNodes() {
     });
   }, []);
 
-  // console.log(edgesSet);
+  console.log(edgesSet);
+  console.log(edgesToClone.value);
   edgesToClone.reduce(async (prev, curr) => {
-    // console.log(curr);
-    const newEdge = await axios
+    console.log(curr);
+    await axios
       .post(
         curr.type === "IS_FATHER"
           ? `http://localhost:5000/actors/addFather/${
@@ -586,14 +589,22 @@ async function cloneTreeNodes() {
         }
       )
       .then((res) => {
-        return res.data;
+        return res.data[0];
       });
   }, []);
+  console.log(edgesToClone);
   alert("TREE CLONED");
 }
 
-onMounted(() => {
-  store.getUsers().then((data) => {
+onMounted(async () => {
+  loggedUser.value = !sessionStorage.loggedUser
+    ? null
+    : JSON.parse(sessionStorage.loggedUser);
+  if (loggedUser.value === null) {
+    console.log("REDIRECTING");
+    window.location.href = "/login";
+  }
+  await store.getUsers().then((data) => {
     store.setStore(data);
     user.value = data.filter((user) => user._id === route.params.id)[0];
   });
@@ -602,10 +613,11 @@ onMounted(() => {
 
 watchEffect(() => {
   if (user.value !== null) {
-    canEdit.value =
-      store.loggedUser !== null
-        ? store.loggedUser._id == user.value._id
-        : false;
+    canEdit.value = store.loggedUsers.some(
+      (e) => e._id === loggedUser.value._id
+    )
+      ? loggedUser.value._id == user.value._id
+      : false;
   }
 
   if (!canEdit) {

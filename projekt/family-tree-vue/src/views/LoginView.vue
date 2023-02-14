@@ -35,6 +35,10 @@
     </p>
     <input type="submit" value="Submit" />
   </VueYupValidation>
+  <div>
+    Dont have an account?
+    <div class="link" @click="this.$router.push(`/register`)">Register</div>
+  </div>
 </template>
 <script>
 import * as yup from "yup";
@@ -44,11 +48,11 @@ import { userStore } from "../store";
 
 const store = userStore();
 
-onMounted(() => {
-  store.getUsers().then((data) => {
-    store.setStore(data);
-  });
-});
+// onMounted(() => {
+//   store.getUsers().then((data) => {
+//     store.setStore(data);
+//   });
+// });
 export default {
   name: "RegisterView",
   components: {
@@ -88,6 +92,13 @@ export default {
 };
 </script>
 <style lang="scss">
+.link {
+  text-decoration: underline;
+  color: #646cff;
+}
+.link:hover {
+  cursor: pointer;
+}
 .header {
   display: flex;
   justify-content: space-between;
