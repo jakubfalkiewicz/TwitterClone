@@ -5,41 +5,26 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 
-// Serialize user into the session
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-// Deserialize user from the session
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id).exec();
-    done(null, user);
-  } catch (error) {
-    done(error);
-  }
-});
-
 // Configure passport to use the local strategy
 passport.use(
   "local",
   new LocalStrategy(
-    { usernameField: "login" },
-    async (username, password, done) => {
+    { usernameField: "login", passReqToCallback: true },
+    async (req, username, password, done) => {
       try {
         const user = await User.findOne({ login: username }).exec();
         if (!user) {
-          return done(null, false, { message: "Incorrect login" });
+          return done("Incorrect login", null);
         }
 
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-          return done(null, false, { message: "Incorrect password" });
+          return done("Incorrect password", null);
         }
 
         return done(null, user);
       } catch (error) {
-        return done(error);
+        return done(error.message, null);
       }
     }
   )
@@ -67,9 +52,22 @@ router.post("/register", async (req, res) => {
 // Set up Express middleware for session management
 
 // Define the login route using passport.authenticate
-router.post("/login", passport.authenticate("local"), (req, res) => {
-  console.log(req.user);
-  res.send({ ...req.user._doc, logged: true });
+router.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user) => {
+    if (err) {
+      return res.status(401).json({
+        timestamp: Date.now(),
+        message: `Access Denied, ${err}`,
+        code: 401,
+      });
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).json({ redirectTo: "/" });
+    });
+  })(req, res, next);
 });
 
 //Logowanie
