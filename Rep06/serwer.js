@@ -1,23 +1,15 @@
 const express = require("express");
 const axios = require("axios");
 const app = express();
+const User = require("./models/User");
 const passport = require("passport");
-const session = require("express-session");
 const cookieSession = require("cookie-session");
-
-// app.use(
-//   session({
-//     secret: "sekrecik",
-//     resave: false,
-//     saveUninitialized: false,
-//   })
-// );
 
 app.use(
   cookieSession({
     name: "TSW-auth-cookie",
     keys: ["sekrecik"],
-    maxAge: 60 * 60,
+    maxAge: 60 * 60 * 1000,
   })
 );
 
@@ -34,7 +26,7 @@ passport.serializeUser((user, done) => {
 // Deserialize user from the session
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id).exec();
+    const user = await User.findById(id);
     done(null, user);
   } catch (error) {
     done(error);

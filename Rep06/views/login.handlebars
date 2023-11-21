@@ -32,7 +32,8 @@
   document.getElementById("loginLogin").value; const userPassword =
   document.getElementById("loginPassword").value; const userEmail =
   axios.post(`http://localhost:3000/users/login`, {login: userLogin, password:
-  userPassword}).then(res => { sessionStorage.setItem("loggedId",
+  userPassword}).then(res => { console.log(res);
+  window.location.href='http://localhost:3000/users/';sessionStorage.setItem("loggedId",
   `${res.data._id}`);}).catch(err => console.log(err)); }; const button =
   document.getElementById("button"); button.addEventListener("click", () =>
   loginUser());

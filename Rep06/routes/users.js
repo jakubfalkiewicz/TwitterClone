@@ -32,13 +32,27 @@ passport.use(
 
 // Pobranie danych wszystkich użytkowników
 router.get("/", async (req, res) => {
-  const users = await User.find({});
-  return res.send(users);
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({
+        timestamp: Date.now(),
+        message: `Access Denied, user unauthenticated`,
+        code: 401,
+      });
+    }
+    const users = await User.find({});
+    return res.send(users);
+  } catch (err) {
+    res.status(500).json({
+      timestamp: Date.now(),
+      message: "Failed to get the users",
+      code: 500,
+    });
+  }
 });
 
 // Utworzenie nowego użytkownika
 router.post("/register", async (req, res) => {
-  console.log(req.body);
   User.create(req.body)
     .then((result) => {
       res.send(result);
@@ -48,8 +62,6 @@ router.post("/register", async (req, res) => {
       res.end(error);
     });
 });
-
-// Set up Express middleware for session management
 
 // Define the login route using passport.authenticate
 router.post("/login", (req, res, next) => {
@@ -65,30 +77,24 @@ router.post("/login", (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.status(200).json({ redirectTo: "/" });
+      console.log("Login successful");
+      res.status(200).json({ message: "login successful!" });
     });
   })(req, res, next);
 });
 
-//Logowanie
-// router.post("/login", async (request, response) => {
-//   try {
-//     const user = await User.findOne({ login: request.body.login }).exec();
-//     if (!user) {
-//       return response.status(400).send({ message: "The login does not exist" });
-//     }
-//     user.comparePassword(request.body.password, (error, match) => {
-//       if (!match) {
-//         return response
-//           .status(400)
-//           .send({ message: "The password is invalid" });
-//       }
-//     });
-//     response.send({ ...user._doc, logged: true });
-//   } catch (error) {
-//     response.status(500).send(error);
-//   }
-// });
+router.post("/logout", async (req, res) => {
+  try {
+    res.clearCookie("TSW-auth-cookie");
+    res.status(200).json({
+      timestamp: Date.now(),
+      message: "Logged out successfully",
+      code: 401,
+    });
+  } catch (e) {
+    throw new Error(e);
+  }
+});
 
 // Pobranie danych użytkownika o podanym userId
 router.get("/:userId", async (req, res) => {
