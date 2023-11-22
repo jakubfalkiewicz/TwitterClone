@@ -80,13 +80,18 @@ app.get("/register", async (req, res) => {
 
 app.get("/profile/:userId", async (req, res) => {
   const userId = req.params.userId;
-  const user = await axios
-    .get(`http://localhost:3000/users/${userId}`)
-    .then((response) => response.data[0]);
-  if (user != undefined) {
+  try {
+    const response = await axios.get(`http://localhost:3000/users/${userId}`);
+    const user = response.data[0];
     res.render("userView", { user });
-  } else {
-    res.send("User with such id doesnt exist");
+  } catch (err) {
+    if (err.response && err.response.status === 401) {
+      // Handle authentication error
+      const errorMessage = err.response.data.message;
+      res.send(errorMessage); // Render an error page with the message
+    } else {
+      res.send("An unexpected error occurred");
+    }
   }
 });
 

@@ -2,6 +2,7 @@
 <div class="reg-log">
   <a href="http://localhost:3000/register">REGISTER</a>
   <a href="http://localhost:3000/login">LOGIN</a>
+  <button onclick="logout()">LOGOUT</button>
 </div>
 
 <div class="users-container">
@@ -11,8 +12,8 @@
   </div>
   {{#each users}}
     <div class="user" id="{{this._id}}">
-      <a href="http://localhost:3000/profile/{{this._id}}">{{@login}}
-        {{this.login}}</a>
+      <button onclick="getUserProfile('{{this._id}}'); return false;">{{@login}}
+        {{this.login}}</button>
       <div>{{@email}} {{this.email}}</div>
       <button class="edit" onclick="editUser({{json this._id}})">EDIT</button>
       <button
@@ -24,12 +25,9 @@
 </div>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
-  let data = sessionStorage.getItem("loggedId"); async function loggedIsAdmin()
-  { await axios.get("http://localhost:3000/users/").then((response) => {
-  console.log(response.data);const admin = response.data.filter((el) => el._id
-  === data.toString())[0].admin; console.log(admin); if (admin) {
-  document.querySelectorAll("button").forEach((el) => (el.style.opacity = "1"));
-  } }); } loggedIsAdmin(); async function deleteUser(id) { await
+  async function logout(){ await
+  axios.post("http://localhost:3000/users/logout") }; async function
+  deleteUser(id) { await
   axios.delete(`http://localhost:3000/users/${id}`).then((response) =>
   console.log(response.data)).catch((err) => console.log(err)); const result =
   confirm("Are you sure?"); if (result) { document.getElementById(id).remove();
@@ -48,6 +46,7 @@
   document.getElementById(id).children[5].value, login:
   document.getElementById(id).children[4].value, }).then((response) =>
   location.reload()).catch((err) => console.log(err)); });
-  document.getElementById(id).appendChild(confirmButton); }
-
+  document.getElementById(id).appendChild(confirmButton); } async function
+  getUserProfile(userId) {
+  window.location.href=`http://localhost:3000/users/${userId}`; }
 </script>

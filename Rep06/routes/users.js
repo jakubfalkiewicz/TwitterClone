@@ -30,16 +30,21 @@ passport.use(
   )
 );
 
+const requireAuth = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    next();
+  } else {
+    return res.status(401).json({
+      timestamp: Date.now(),
+      message: `Access Denied, user unauthenticated`,
+      code: 401,
+    });
+  }
+};
+
 // Pobranie danych wszystkich użytkowników
 router.get("/", async (req, res) => {
   try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({
-        timestamp: Date.now(),
-        message: `Access Denied, user unauthenticated`,
-        code: 401,
-      });
-    }
     const users = await User.find({});
     return res.send(users);
   } catch (err) {
@@ -97,10 +102,30 @@ router.post("/logout", async (req, res) => {
 });
 
 // Pobranie danych użytkownika o podanym userId
-router.get("/:userId", async (req, res) => {
-  const id = req.params.userId;
-  const user = await User.find({ _id: id });
-  return res.send(user);
+router.get("/:userId", requireAuth, async (req, res) => {
+  try {
+    const id = req.params.userId;
+    const user = await User.find({ _id: id });
+
+    // Handle the case where no user is found with the given ID
+    if (!user || user.length === 0) {
+      return res.status(404).json({
+        timestamp: Date.now(),
+        message: `User with ID ${id} not found`,
+        code: 404,
+      });
+    }
+    // If the user is found, send the user data in the response
+    return res.send(user);
+  } catch (error) {
+    console.error(error);
+    // Handle unexpected errors with a generic message
+    return res.status(500).json({
+      timestamp: Date.now(),
+      message: "Internal Server Error",
+      code: 500,
+    });
+  }
 });
 
 // Zastąpienie danych użytkownika o podanym userId nowym „kompletem”
