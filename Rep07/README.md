@@ -1,0 +1,1 @@
+# Lab06 - dodawanie PassportJS do prostej apki RESTowej na bazie handlebars
