@@ -133,5 +133,10 @@ mongoose
       console.log(`API server available from: http://${apiHost}:${apiPort}`);
     });
     const io = socketIO(server);
+    io.on("connect", (socket) => {
+      socket.on("global-message", (response, err) => {
+        io.emit("global-message", response);
+      });
+    });
   })
   .catch((error) => console.error("Error connecting to MongoDB", error));

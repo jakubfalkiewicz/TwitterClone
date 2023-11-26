@@ -1,6 +1,16 @@
 <div>
   <h1>Global chat</h1>
-  <div>Hey </div>
+  <div id="socketId">Current socketId: null</div>
+  <ul id="messages"></ul>
+  <div>
+    <input id="input" placeholder="Type a message..." />
+    <button id="submit" type="submit">Send message</button>
+  </div>
+
 </div>
 <script src="/socket.io/socket.io.js"></script>
-<script>var socket = io();</script>
+<script src="/chat.js" defer></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"
+></script>
