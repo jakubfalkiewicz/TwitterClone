@@ -3,14 +3,10 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
-// Serialize user into the session
 passport.serializeUser((user, done) => {
   return done(null, user?.id);
 });
 
-//PRZEKAZYWAĆ NIE TYLKO ID ALE TEŻ USERNAME (DLA CZATU)
-
-// Deserialize user from the session
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);

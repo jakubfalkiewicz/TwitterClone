@@ -18,10 +18,10 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireAuth, async (req, res) => {
-  console.log(req.body);
-  Message.create(req.body)
+  const message = { ...req.body, user: req.username };
+  Message.create(message)
     .then((result) => {
-      res.send(result);
+      res.send(message);
     })
     .catch((error) => {
       res.status(400);

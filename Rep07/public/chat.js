@@ -20,7 +20,9 @@ setTimeout(() => {
       };
       axios
         .post("http://localhost:3000/messages/", message)
-        .then((res) => socket.emit("global-message", message))
+        .then((res) => {
+          socket.emit("global-message", res.data);
+        })
         .catch((err) => {
           if (err.response.data.code === 401) {
             window.location.href = "http://localhost:3000/login";
