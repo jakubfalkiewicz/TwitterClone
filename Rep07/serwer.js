@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const app = express();
 const User = require("./models/User");
-const passport = require("passport");
+const passport = require("./auth/passportConfig");
 const cookieSession = require("cookie-session");
 const socketIO = require("socket.io");
 
@@ -18,21 +18,6 @@ app.use(express.json());
 // Initialize passport and the express-session middleware
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Serialize user into the session
-passport.serializeUser((user, done) => {
-  return done(null, user?.id);
-});
-
-// Deserialize user from the session
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error);
-  }
-});
 
 app.use(express.json());
 app.use(function (req, res, next) {
@@ -80,7 +65,11 @@ app.get("/register", async (req, res) => {
 });
 
 app.get("/globalChat", async (req, res) => {
-  res.render("globalChat");
+  const messages = await axios
+    .get("http://localhost:3000/messages/")
+    .then((response) => response.data)
+    .catch((err) => console.log(err));
+  res.render("globalChat", { messages });
 });
 
 app.get("/profile/:userId", async (req, res) => {
@@ -102,7 +91,9 @@ app.get("/profile/:userId", async (req, res) => {
 
 // Dodajemy usługi REST, które należy zdefiniować w pliku „users.js” znajdującym się w podkatalogu „routes”
 const users = require("./routes/users");
+const messages = require("./routes/messages");
 app.use("/users", users);
+app.use("/messages", messages);
 // app.use("/", express.static(__dirname, +"/public"));
 app.use(express.static("public"));
 

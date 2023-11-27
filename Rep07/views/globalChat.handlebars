@@ -1,7 +1,16 @@
 <div>
   <h1>Global chat</h1>
   <div id="socketId">Current socketId: null</div>
-  <ul id="messages"></ul>
+  <ul id="messages">
+    {{#each messages}}
+      <li class="message" id="{{this._id}}">
+        {{this.user}}:
+        {{this.content}}
+        |
+        {{this.date}}
+      </li>
+    {{/each}}
+  </ul>
   <div>
     <input id="input" placeholder="Type a message..." />
     <button id="submit" type="submit">Send message</button>

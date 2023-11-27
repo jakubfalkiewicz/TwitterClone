@@ -1,48 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
-const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-const bcrypt = require("bcrypt");
+const passport = require("../auth/passportConfig");
+const requireAuth = require("../auth/authMiddleware");
 
-// Configure passport to use the local strategy
-passport.use(
-  "local",
-  new LocalStrategy(
-    { usernameField: "login", passReqToCallback: true },
-    async (req, username, password, done) => {
-      try {
-        const user = await User.findOne({ login: username }).exec();
-        if (!user) {
-          return done("Incorrect login", null);
-        }
-
-        const match = await bcrypt.compare(password, user.password);
-        if (!match) {
-          return done("Incorrect password", null);
-        }
-
-        return done(null, user);
-      } catch (error) {
-        return done(error.message, null);
-      }
-    }
-  )
-);
-
-const requireAuth = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    next();
-  } else {
-    return res.status(401).json({
-      timestamp: Date.now(),
-      message: `Access Denied, user unauthenticated`,
-      code: 401,
-    });
-  }
-};
-
-// Pobranie danych wszystkich użytkowników
 router.get("/", async (req, res) => {
   try {
     const users = await User.find({});
@@ -56,7 +17,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Utworzenie nowego użytkownika
 router.post("/register", async (req, res) => {
   User.create(req.body)
     .then((result) => {
@@ -68,7 +28,6 @@ router.post("/register", async (req, res) => {
     });
 });
 
-// Define the login route using passport.authenticate
 router.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user) => {
     if (err) {
@@ -101,7 +60,6 @@ router.post("/logout", async (req, res) => {
   }
 });
 
-// Pobranie danych użytkownika o podanym userId
 router.get("/:userId", requireAuth, async (req, res) => {
   try {
     const id = req.params.userId;
@@ -128,7 +86,6 @@ router.get("/:userId", requireAuth, async (req, res) => {
   }
 });
 
-// Zastąpienie danych użytkownika o podanym userId nowym „kompletem”
 router.put("/:userId", async (req, res) => {
   const id = req.params.userId;
   const user = User.find({ _id: id });
@@ -140,12 +97,12 @@ router.put("/:userId", async (req, res) => {
   const updatedUser = await User.findByIdAndUpdate(filter, update);
   return res.send({ updatedUser: updatedUser });
 });
+
 router.delete("/deleteAll", async (req, res) => {
   await User.deleteMany({});
   return res.send("Deleted all");
 });
 
-// Usuniecie użytkownika o podanym userId
 router.delete("/:userId", async (req, res) => {
   const id = req.params.userId;
   const userToDelete = await User.findByIdAndDelete({ _id: id });
@@ -154,7 +111,6 @@ router.delete("/:userId", async (req, res) => {
   });
 });
 
-// „Unacześnienie” wybranych danych użytkownika o podanym userId
 router.patch("/:userId", async (req, res) => {
   const id = req.params.userId;
   return res.send({
