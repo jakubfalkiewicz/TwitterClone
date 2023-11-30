@@ -1,0 +1,28 @@
+<h1>Administration App: Home</h1>
+<div class="reg-log">
+  <a href="http://localhost:3000/register">REGISTER</a>
+  <a href="http://localhost:3000/login">LOGIN</a>
+  <button onclick="logout()">LOGOUT</button>
+  <button onclick="openChat()">Chat</button>
+</div>
+
+<div class="users-container">
+  <div class="user-label">
+    <div class="label">LOGIN</div>
+    <div class="label">EMAIL</div>
+  </div>
+  {{#each users}}
+    <div class="user" id="{{this._id}}">
+      <button onclick="getUserProfile('{{this._id}}'); return false;">{{@login}}
+        {{this.login}}</button>
+      <div>{{@email}} {{this.email}}</div>
+      <button class="edit" onclick="editUser({{json this._id}})">EDIT</button>
+      <button
+        class="delete"
+        onclick="deleteUser({{json this._id}})"
+      >DELETE</button>
+    </div>
+  {{/each}}
+</div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="/home.js" defer></script>
