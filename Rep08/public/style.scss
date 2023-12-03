@@ -4,6 +4,9 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  .chats {
+    display: flex;
+  }
   .edit {
     color: orange;
   }

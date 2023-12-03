@@ -1,7 +1,6 @@
 const express = require("express");
 const axios = require("axios");
 const app = express();
-const User = require("./models/User");
 const passport = require("./auth/passportConfig");
 const cookieSession = require("cookie-session");
 const socketIO = require("socket.io");
@@ -130,9 +129,22 @@ mongoose
     });
 
     const io = socketIO(server);
-    io.of("/globalChat").on("connect", (socket) => {
+    const globalChat = io.of("/globalChat");
+    globalChat.on("connect", (socket) => {
+      socket.join("globalChat");
       socket.on("global-message", (response, err) => {
-        socket.emit("global-message", response);
+        socket.to("globalChat").emit("global-message", response);
+      });
+    });
+    const publicChat = io.of("/publicChat");
+    publicChat.on("connect", (socket) => {
+      socket.join("publicChat");
+      socket.to("publicChat").emit("user-connect", socket.id.slice(0, 5));
+      socket.on("public-message", (response, err) => {
+        socket.to("publicChat").emit("public-message", response);
+      });
+      socket.on("disconnect", () => {
+        socket.to("publicChat").emit("user-disconnect", socket.id.slice(0, 5));
       });
     });
   })

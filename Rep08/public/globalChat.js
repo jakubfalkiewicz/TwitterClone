@@ -1,5 +1,4 @@
 const socket = io(`http://${location.host}/globalChat`);
-const now = moment();
 const currSocket = document.getElementById("socketId");
 const input = document.getElementById("input");
 const messagesList = document.getElementById("messages");
@@ -12,15 +11,20 @@ setTimeout(async () => {
   submit.addEventListener("click", (event) => {
     event.preventDefault();
     if (input.value.trim().length !== 0) {
+      var date = new Date();
       const message = {
         user: socketId,
-        date: now.format("HH:mm:ss"),
+        date: date.toLocaleTimeString(),
         content: input.value,
       };
       axios
         .post("http://localhost:3000/messages/", message)
         .then((res) => {
           socket.emit("global-message", res.data);
+          const chatMessage = document.createElement("li");
+          console.log(res.data);
+          chatMessage.innerHTML = `${res.data.user}: ${res.data.content} | ${res.data.date}`;
+          messagesList.appendChild(chatMessage);
         })
         .catch((err) => {
           if (err.response.data.code === 401) {

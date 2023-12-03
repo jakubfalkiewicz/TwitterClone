@@ -5,6 +5,9 @@ body {
   justify-content: center;
   align-items: center;
 }
+body .chats {
+  display: flex;
+}
 body .edit {
   color: orange;
 }
