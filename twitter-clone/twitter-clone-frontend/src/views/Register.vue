@@ -3,7 +3,7 @@
     <div>Register</div>
     <input v-model="login" placeholder="Login" />
     <input v-model="password" placeholder="Password" type="password" />
-    <button @click="register">Register</button>
+    <button @click="apiRegister">Register</button>
   </div>
 </template>
 
@@ -15,16 +15,15 @@ let login = "";
 let password = "";
 
 // Function to handle registration
-const register = async () => {
+const apiRegister = async () => {
   try {
-    const response = await axios.post("/users/register", {
+    await axios.post("/users/register", {
       login,
       password,
     });
-
-    console.log("Registration successful", response.data);
+    window.location.href = "/login";
   } catch (error) {
-    console.error("Registration failed", error.response.data);
+    console.error(error.response.data);
   }
 };
 </script>

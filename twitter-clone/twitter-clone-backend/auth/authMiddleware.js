@@ -1,6 +1,6 @@
 const requireAuth = (req, res, next) => {
   if (req.isAuthenticated()) {
-    req.username = req.user.login;
+    req.login = req.user.login;
     next();
   } else {
     return res.status(401).json({

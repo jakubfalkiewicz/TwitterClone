@@ -17,14 +17,23 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/authenticate", requireAuth, async (req, res) => {
+  try {
+    const user = await User.findOne({ logIn: req.login });
+    console.log(user);
+    res.status(200).json(user);
+  } catch (e) {
+    throw new Error(e);
+  }
+});
+
 router.post("/register", async (req, res) => {
   User.create(req.body)
     .then((result) => {
       res.send(result);
     })
     .catch((error) => {
-      res.status(400);
-      res.end(error);
+      res.status(400).send(error.message);
     });
 });
 
@@ -41,8 +50,7 @@ router.post("/login", (req, res, next) => {
       if (err) {
         return next(err);
       }
-      console.log("Login successful");
-      res.status(200).json({ message: "login successful!" });
+      res.status(200).json({ login: user.login });
     });
   })(req, res, next);
 });
