@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const Message = require("../models/Message");
-const passport = require("../auth/passportConfig");
 const requireAuth = require("../auth/authMiddleware");
 
 router.get("/", async (req, res) => {
@@ -10,7 +9,6 @@ router.get("/", async (req, res) => {
     return res.send(messages);
   } catch (err) {
     res.status(500).json({
-      timestamp: Date.now(),
       message: "Failed to get the users",
       code: 500,
     });

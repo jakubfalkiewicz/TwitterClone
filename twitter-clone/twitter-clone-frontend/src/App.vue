@@ -6,7 +6,7 @@ import useAuthStore from "./stores/AuthStore";
 import { storeToRefs } from "pinia";
 
 const auth = useAuthStore();
-const { isAuthenticated, authRequestSent, logOut } = storeToRefs(auth);
+const { isAuthenticated, authRequestSent } = storeToRefs(auth);
 
 onMounted(() => {
   auth.authenticate();
@@ -15,7 +15,7 @@ onMounted(() => {
 
 <template>
   <div v-if="authRequestSent">
-    <Navbar :isAuthenticated="isAuthenticated" v-on:logout="logOut"></Navbar>
+    <Navbar :isAuthenticated="isAuthenticated"></Navbar>
     <RouterView></RouterView>
   </div>
 </template>

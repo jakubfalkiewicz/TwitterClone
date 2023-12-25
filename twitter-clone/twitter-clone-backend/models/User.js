@@ -9,6 +9,7 @@ const userSchema = new Schema({
   email: { type: String, required: false, default: "" },
   admin: { type: Boolean, default: false },
   registrationDate: { type: Date, default: Date.now },
+  follows: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
 userSchema.pre("save", async function (next) {

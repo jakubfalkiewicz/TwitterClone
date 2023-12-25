@@ -10,6 +10,8 @@
 <script setup>
 import axios from "../api/axios";
 import useAuthStore from "../stores/AuthStore";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 const auth = useAuthStore();
 let login = "";
@@ -22,7 +24,7 @@ const apiLogin = async () => {
       password,
     });
     auth.logIn(response.data.login);
-    window.location.href = "/";
+    router.push({ path: `/user/${response.data.login}` });
   } catch (error) {
     console.error(error.response.data);
   }

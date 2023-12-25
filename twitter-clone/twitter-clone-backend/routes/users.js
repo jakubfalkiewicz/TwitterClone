@@ -10,7 +10,6 @@ router.get("/", async (req, res) => {
     return res.send(users);
   } catch (err) {
     res.status(500).json({
-      timestamp: Date.now(),
       message: "Failed to get the users",
       code: 500,
     });
@@ -20,9 +19,9 @@ router.get("/", async (req, res) => {
 router.get("/authenticate", requireAuth, async (req, res) => {
   try {
     const user = await User.findOne({ logIn: req.login });
-    console.log(user);
     res.status(200).json(user);
   } catch (e) {
+    console.log(e);
     throw new Error(e);
   }
 });
@@ -41,7 +40,6 @@ router.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user) => {
     if (err) {
       return res.status(401).json({
-        timestamp: Date.now(),
         message: `Access Denied, ${err}`,
         code: 401,
       });
@@ -59,7 +57,6 @@ router.post("/logout", async (req, res) => {
   try {
     res.clearCookie("TSW-auth-cookie");
     res.status(200).json({
-      timestamp: Date.now(),
       message: "Logged out successfully",
       code: 401,
     });
@@ -68,26 +65,21 @@ router.post("/logout", async (req, res) => {
   }
 });
 
-router.get("/:userId", requireAuth, async (req, res) => {
+router.get("/:username", requireAuth, async (req, res) => {
   try {
-    const id = req.params.userId;
-    const user = await User.find({ _id: id });
+    const username = req.params.username;
+    const user = await User.findOne({ login: username });
 
-    // Handle the case where no user is found with the given ID
     if (!user || user.length === 0) {
       return res.status(404).json({
-        timestamp: Date.now(),
-        message: `User with ID ${id} not found`,
+        message: `User with login ${username} not found`,
         code: 404,
       });
     }
-    // If the user is found, send the user data in the response
     return res.send(user);
   } catch (error) {
     console.error(error);
-    // Handle unexpected errors with a generic message
     return res.status(500).json({
-      timestamp: Date.now(),
       message: "Internal Server Error",
       code: 500,
     });

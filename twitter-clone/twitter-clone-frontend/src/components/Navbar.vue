@@ -1,31 +1,40 @@
 <template>
   <div id="navbar">
-    <div>Navbar</div>
     <button @click="navigateToHome">Home</button>
-    <div v-if="isAuthenticated">
-      <button @click="navigateToAccount">Account</button>
-      <button @click="logOut">Logout</button>
-    </div>
-    <div v-else>
-      <button @click="navigateToRegister">Register</button>
-      <button @click="navigateToLogin">Login</button>
-    </div>
+    <button v-if="isAuthenticated" @click="navigateToAccount">Account</button>
+    <button v-if="isAuthenticated" @click="logOut">Logout</button>
+    <button v-if="!isAuthenticated" @click="navigateToRegister">
+      Register
+    </button>
+    <button v-if="!isAuthenticated" @click="navigateToLogin">Login</button>
   </div>
 </template>
 <script setup>
 import axios from "../api/axios";
-defineProps(["isAuthenticated"]);
-const emit = defineEmits(["logout"]);
+import { useRouter } from "vue-router";
+import useAuthStore from "../stores/AuthStore";
 
-const navigateToRegister = () => (window.location.href = "/register");
-const navigateToLogin = () => (window.location.href = "/login");
-const navigateToHome = () => (window.location.href = "/");
-const navigateToAccount = () => (window.location.href = "/");
+const auth = useAuthStore();
+const router = useRouter();
+defineProps(["isAuthenticated"]);
+
+const navigateToRegister = () => {
+  router.push({ path: "/register" });
+};
+const navigateToLogin = () => {
+  router.push({ path: "/login" });
+};
+const navigateToHome = () => {
+  router.push({ path: "/" });
+};
+const navigateToAccount = () => {
+  router.push({ path: `/user/${auth.login}` });
+};
 
 const logOut = async () => {
   await axios.post("/users/logout");
-  emit("logout");
-  window.location.href = "/login";
+  auth.logOut();
+  router.push({ path: "/login" });
 };
 </script>
 <style scoped>
