@@ -18,7 +18,8 @@ router.get("/", async (req, res) => {
 
 router.get("/authenticate", requireAuth, async (req, res) => {
   try {
-    const user = await User.findOne({ logIn: req.login });
+    console.log(req.login);
+    const user = await User.findOne({ login: req.login });
     res.status(200).json(user);
   } catch (e) {
     console.log(e);
@@ -60,6 +61,33 @@ router.post("/logout", async (req, res) => {
       message: "Logged out successfully",
       code: 401,
     });
+  } catch (e) {
+    throw new Error(e);
+  }
+});
+
+router.post("/follow", requireAuth, async (req, res) => {
+  const userToFollow = req.body.followedId;
+  try {
+    const user = await User.findOne({ _id: req.userId });
+    if (!user.follows.includes(userToFollow)) {
+      user.follows = [...user.follows, userToFollow];
+      await User.updateOne({ _id: req.userId }, user);
+    }
+  } catch (e) {
+    throw new Error(e);
+  }
+});
+
+router.post("/unfollow", requireAuth, async (req, res) => {
+  const userToUnfollow = req.body.unfollowedId;
+  try {
+    const user = await User.findOne({ _id: req.userId });
+    console.log(user);
+    if (user.follows.includes(userToUnfollow)) {
+      user.follows = user.follows.filter((user) => user._id != userToUnfollow);
+      await User.updateOne({ _id: req.userId }, user);
+    }
   } catch (e) {
     throw new Error(e);
   }

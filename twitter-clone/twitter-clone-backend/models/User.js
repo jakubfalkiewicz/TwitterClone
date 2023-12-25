@@ -10,6 +10,7 @@ const userSchema = new Schema({
   admin: { type: Boolean, default: false },
   registrationDate: { type: Date, default: Date.now },
   follows: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  blocked: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
 userSchema.pre("save", async function (next) {

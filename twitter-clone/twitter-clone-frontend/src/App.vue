@@ -16,6 +16,6 @@ onMounted(() => {
 <template>
   <div v-if="authRequestSent">
     <Navbar :isAuthenticated="isAuthenticated"></Navbar>
-    <RouterView></RouterView>
+    <RouterView :key="$route.fullPath"></RouterView>
   </div>
 </template>

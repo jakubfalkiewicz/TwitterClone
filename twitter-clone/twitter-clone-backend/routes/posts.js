@@ -5,19 +5,18 @@ const requireAuth = require("../auth/authMiddleware");
 
 const getCurrentDate = () => {
   var dateTime = new Date();
-  return (
-    dateTime.getUTCFullYear() +
-    "/" +
-    (dateTime.getUTCMonth() + 1) +
-    "/" +
-    dateTime.getUTCDate() +
-    " " +
-    dateTime.getUTCHours() +
-    ":" +
-    dateTime.getUTCMinutes() +
-    ":" +
-    dateTime.getUTCSeconds()
-  );
+  return dateTime.getUTCHours() > 9
+    ? dateTime.getUTCHours()
+    : "0" + dateTime.getUTCHours() + ":" + dateTime.getUTCMinutes() > 9
+    ? dateTime.getUTCMinutes()
+    : "0" +
+      dateTime.getUTCMinutes() +
+      " " +
+      dateTime.getUTCDate() +
+      "/" +
+      (dateTime.getUTCMonth() + 1) +
+      "/" +
+      dateTime.getUTCFullYear();
 };
 
 router.get("/", async (req, res) => {
