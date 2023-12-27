@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
+const User = require("../models/User");
 const requireAuth = require("../auth/authMiddleware");
 
 const getCurrentDate = () => {
@@ -26,6 +27,36 @@ router.get("/", async (req, res) => {
   } catch (err) {
     res.status(500).json({
       timestamp: Date.now(),
+      post: "Failed to get the users",
+      code: 500,
+    });
+  }
+});
+
+router.get("/feed", requireAuth, async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    const user = await User.findById(userId).populate("follows");
+
+    const followerIds = user.follows.map((follower) => follower._id);
+
+    const posts = await Post.find({ author: { $in: followerIds } });
+
+    res.json(posts);
+  } catch (error) {
+    console.error("Error fetching tweets:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.get("/:userId", requireAuth, async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const post = await Post.find({ author: userId });
+    return res.send(post);
+  } catch (err) {
+    res.status(500).json({
       post: "Failed to get the users",
       code: 500,
     });

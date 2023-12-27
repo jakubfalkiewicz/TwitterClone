@@ -12,21 +12,8 @@
       <button @click="showForm = !showForm">+</button>
     </div>
     <!-- TODO: Separate component -->
-    <div v-if="posts != null" class="posts-container">
-      <div v-for="post in posts" class="post">
-        <div class="post-headline">
-          <div>{{ user.login }}</div>
-          <div>{{ post.date }}</div>
-        </div>
-        <div>
-          {{ post.text.slice(0, 100) + (post.text.length > 100 ? "..." : "") }}
-        </div>
-        <div class="post-metadata">
-          <div>Comments: {{ post.comments.length }}</div>
-          <div>Reposts: {{ post.reposts.length }}</div>
-          <div>Views: {{ post.views }}</div>
-        </div>
-      </div>
+    <div v-for="post in posts" v-if="posts != null" class="posts-container">
+      <Post :post="post"></Post>
     </div>
   </div>
   <AddPostForm
@@ -40,6 +27,7 @@ import { ref, onMounted } from "vue";
 import axios from "../api/axios";
 import { useRoute } from "vue-router";
 import AddPostForm from "../components/AddPostForm.vue";
+import Post from "../components/Post.vue";
 import useAuthStore from "../stores/AuthStore";
 
 const { follows, login } = useAuthStore();
@@ -58,7 +46,7 @@ onMounted(async () => {
   await axios.get(`/posts/${user.value._id}`).then((res) => {
     posts.value = res.data;
   });
-  followed.value = follows.includes(user.value._id);
+  followed.value = follows?.includes(user.value._id);
   console.log(followed.value);
 });
 
@@ -92,25 +80,5 @@ const unfollowUser = async (e) => {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  .post {
-    display: flex;
-    flex-direction: column;
-    background: black;
-    padding: 1rem;
-    border-radius: 1rem;
-    width: 40%;
-    min-width: 250px;
-    text-align: start;
-    gap: 0.5rem;
-    .post-headline {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    .post-metadata {
-      display: flex;
-      justify-content: space-evenly;
-    }
-  }
 }
 </style>
