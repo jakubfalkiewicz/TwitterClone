@@ -23,11 +23,12 @@ const getCurrentDate = () => {
 router.get("/", async (req, res) => {
   try {
     const posts = await Post.find({});
-    return res.send(posts);
+
+    res.json(posts);
   } catch (err) {
     res.status(500).json({
       timestamp: Date.now(),
-      post: "Failed to get the users",
+      post: "Failed to get the posts",
       code: 500,
     });
   }
@@ -43,7 +44,21 @@ router.get("/feed", requireAuth, async (req, res) => {
 
     const posts = await Post.find({ author: { $in: followerIds } });
 
-    res.json(posts);
+    await Post.populate(posts, { path: "author" });
+
+    const formattedPosts = posts.map((post) => ({
+      _id: post._id,
+      author: post.author._id,
+      authorName: post.author.login,
+      date: post.date,
+      text: post.text,
+      photo: post.photo,
+      reposts: post.reposts,
+      views: post.views,
+      comments: post.comments,
+    }));
+
+    res.json(formattedPosts);
   } catch (error) {
     console.error("Error fetching tweets:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -53,24 +68,25 @@ router.get("/feed", requireAuth, async (req, res) => {
 router.get("/:userId", requireAuth, async (req, res) => {
   const userId = req.params.userId;
   try {
-    const post = await Post.find({ author: userId });
-    return res.send(post);
-  } catch (err) {
-    res.status(500).json({
-      post: "Failed to get the users",
-      code: 500,
-    });
-  }
-});
+    const posts = await Post.find({ author: userId });
+    await Post.populate(posts, { path: "author" });
 
-router.get("/:userId", requireAuth, async (req, res) => {
-  const userId = req.params.userId;
-  try {
-    const post = await Post.find({ author: userId });
-    return res.send(post);
+    const formattedPosts = posts.map((post) => ({
+      _id: post._id,
+      author: post.author._id,
+      authorName: post.author.login,
+      date: post.date,
+      text: post.text,
+      photo: post.photo,
+      reposts: post.reposts,
+      views: post.views,
+      comments: post.comments,
+    }));
+
+    res.json(formattedPosts);
   } catch (err) {
     res.status(500).json({
-      post: "Failed to get the users",
+      post: "Failed to get the posts",
       code: 500,
     });
   }

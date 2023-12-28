@@ -9,7 +9,12 @@
     </div>
     <div>
       Posts
-      <button @click="showForm = !showForm">+</button>
+      <button
+        v-if="user != null && user.login === login"
+        @click="showForm = !showForm"
+      >
+        +
+      </button>
     </div>
     <!-- TODO: Separate component -->
     <div v-for="post in posts" v-if="posts != null" class="posts-container">
@@ -47,7 +52,7 @@ onMounted(async () => {
     posts.value = res.data;
   });
   followed.value = follows?.includes(user.value._id);
-  console.log(followed.value);
+  console.log(follows?.includes(user.value._id));
 });
 
 const addPost = (post) => {
@@ -57,14 +62,12 @@ const addPost = (post) => {
 const followUser = async (e) => {
   e.preventDefault();
   followed.value = !followed.value;
-  console.log(followed.value);
   await axios.post("/users/follow", { followedId: user.value._id });
 };
 
 const unfollowUser = async (e) => {
   e.preventDefault();
   followed.value = !followed.value;
-  console.log(followed.value);
   await axios.post("/users/unfollow", { unfollowedId: user.value._id });
 };
 </script>

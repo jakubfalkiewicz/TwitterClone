@@ -1,15 +1,25 @@
 <script setup>
-import { RouterView } from "vue-router";
-import { onMounted } from "vue";
+import { RouterView, useRouter } from "vue-router";
+import { onMounted, watchEffect } from "vue";
 import Navbar from "./components/Navbar.vue";
 import useAuthStore from "./stores/AuthStore";
 import { storeToRefs } from "pinia";
 
+const router = useRouter();
 const auth = useAuthStore();
 const { isAuthenticated, authRequestSent } = storeToRefs(auth);
 
-onMounted(() => {
-  auth.authenticate();
+onMounted(async () => {
+  await auth.authenticate();
+});
+
+watchEffect(() => {
+  setTimeout(() => {
+    if (isAuthenticated.value != null && !isAuthenticated.value) {
+      router.push({ path: "/login" });
+    }
+  }, 500);
+  console.log(auth.login);
 });
 </script>
 

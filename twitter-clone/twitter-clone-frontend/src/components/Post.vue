@@ -1,7 +1,9 @@
 <template>
   <div class="post">
     <div class="post-headline">
-      <!-- <div>{{ user.login }}</div> -->
+      <div @click="$router.push(`/user/${post.authorName}`)">
+        {{ post.authorName }}
+      </div>
       <div>{{ post.date }}</div>
     </div>
     <div>

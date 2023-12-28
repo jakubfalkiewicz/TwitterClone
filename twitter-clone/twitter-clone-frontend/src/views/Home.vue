@@ -8,14 +8,11 @@
 <script setup>
 import axios from "../api/axios";
 import { ref, onMounted } from "vue";
-import useAuthStore from "../stores/AuthStore";
 import Post from "../components/Post.vue";
 
-const { follows } = useAuthStore();
 const posts = ref(null);
 
 onMounted(async () => {
-  console.log(follows);
   const test = await axios.get(`/posts/feed`);
   posts.value = test.data;
 });
