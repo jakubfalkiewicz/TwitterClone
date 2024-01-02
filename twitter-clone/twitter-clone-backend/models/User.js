@@ -6,6 +6,7 @@ const saltRounds = 10; // You can adjust this based on your security requirement
 const userSchema = new Schema({
   login: { type: String, required: true },
   password: { type: String, required: true },
+  avatar: { type: String, required: false },
   email: { type: String, required: false, default: "" },
   admin: { type: Boolean, default: false },
   registrationDate: { type: Date, default: Date.now },
