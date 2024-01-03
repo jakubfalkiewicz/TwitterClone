@@ -99,12 +99,21 @@ router.get("/:username", requireAuth, async (req, res) => {
   try {
     const username = req.params.username;
     const user = await User.findOne({ login: username });
+    console.log(user.avatar);
 
     if (!user || user.length === 0) {
       return res.status(404).json({
         message: `User with login ${username} not found`,
         code: 404,
       });
+    } else if (user.avatar !== undefined) {
+      user.avatar =
+        "https://" +
+        process.env.API_HOST +
+        ":" +
+        process.env.API_PORT +
+        "/uploads/" +
+        user.avatar;
     }
     return res.send(user);
   } catch (error) {

@@ -21,12 +21,11 @@ const upload = multer({
     ) {
       cb(null, true);
     } else {
-      console.log("");
       cb("Wrong file type", false);
     }
   },
   limits: {
-    fileSize: 1024 * 1024 * 2,
+    fileSize: 1024 * 1024,
   },
 });
 

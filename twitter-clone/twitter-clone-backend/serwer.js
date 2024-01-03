@@ -15,7 +15,6 @@ app.use(
   })
 );
 
-app.use(express.json());
 // Initialize passport and the express-session middleware
 app.use(passport.initialize());
 app.use(passport.session());
@@ -34,6 +33,8 @@ const posts = require("./routes/posts");
 app.use("/users", users);
 app.use("/messages", messages);
 app.use("/posts", posts);
+app.use(express.static("public"));
+app.use("/uploads", express.static("uploads"));
 
 require("dotenv").config();
 
@@ -65,8 +66,8 @@ mongoose
     console.log(
       `Connected to MongoDB. Database name: "${response.connections[0].name}"`
     );
-    const apiPort = process.env.PORT || 5000;
-    const apiHost = process.env.API_HOST || "localhost";
+    const apiPort = process.env.API_PORT;
+    const apiHost = process.env.API_HOST;
 
     server.listen(apiPort, () => {
       console.log(`API server available from: https://${apiHost}:${apiPort}`);

@@ -15,6 +15,7 @@
 import { ref } from "vue";
 import axios from "../api/axios";
 const emits = defineEmits(["close", "submitPost"]);
+defineProps(["userAvatar"]);
 const content = ref("");
 
 const closeModal = () => {
@@ -25,6 +26,7 @@ const submitPost = async () => {
   const response = await axios.post("/posts/", {
     text: content.value,
     photo: null,
+    authorAvatar: userAvatar,
   });
   console.log(response.data);
   emits("submitPost", { ...response.data });

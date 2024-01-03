@@ -1,7 +1,18 @@
 <template>
   <div id="account">
     <div v-if="user != null">
-      <div>{{ user.login }}</div>
+      <div>
+        <img
+          :width="50"
+          :height="50"
+          class="avatar"
+          alt=""
+          :src="
+            user.avatar !== undefined ? user.avatar : '../public/avatar.png'
+          "
+        />
+        <div>{{ user.login }}</div>
+      </div>
       <div v-if="login !== user.login">
         <button v-if="!followed" @click="followUser">Follow</button>
         <button v-else @click="unfollowUser">Unollow</button>
@@ -25,6 +36,7 @@
     v-if="showForm"
     v-on:close="showForm = !showForm"
     v-on:submitPost="addPost"
+    :userAvatar="user.avatar"
   ></AddPostForm>
 </template>
 <script setup>
@@ -52,7 +64,6 @@ onMounted(async () => {
     posts.value = res.data;
   });
   followed.value = follows?.includes(user.value._id);
-  console.log(follows?.includes(user.value._id));
 });
 
 const addPost = (post) => {
@@ -83,5 +94,8 @@ const unfollowUser = async (e) => {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+}
+.avatar {
+  border-radius: 100%;
 }
 </style>

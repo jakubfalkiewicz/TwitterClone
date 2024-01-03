@@ -6,18 +6,17 @@ const requireAuth = require("../auth/authMiddleware");
 
 const getCurrentDate = () => {
   var dateTime = new Date();
-  return dateTime.getUTCHours() > 9
-    ? dateTime.getUTCHours()
-    : "0" + dateTime.getUTCHours() + ":" + dateTime.getUTCMinutes() > 9
-    ? dateTime.getUTCMinutes()
-    : "0" +
-      dateTime.getUTCMinutes() +
-      " " +
-      dateTime.getUTCDate() +
-      "/" +
-      (dateTime.getUTCMonth() + 1) +
-      "/" +
-      dateTime.getUTCFullYear();
+  return (
+    dateTime.getUTCHours() +
+    ":" +
+    dateTime.getUTCMinutes() +
+    " " +
+    dateTime.getUTCDate() +
+    "/" +
+    (dateTime.getUTCMonth() + 1) +
+    "/" +
+    dateTime.getUTCFullYear()
+  );
 };
 
 router.get("/", async (req, res) => {
@@ -50,6 +49,7 @@ router.get("/feed", requireAuth, async (req, res) => {
       _id: post._id,
       author: post.author._id,
       authorName: post.author.login,
+      authorAvatar: post.author.avatarUrl,
       date: post.date,
       text: post.text,
       photo: post.photo,
@@ -74,6 +74,7 @@ router.get("/:userId", requireAuth, async (req, res) => {
     const formattedPosts = posts.map((post) => ({
       _id: post._id,
       author: post.author._id,
+      authorAvatar: post.author.avatarUrl,
       authorName: post.author.login,
       date: post.date,
       text: post.text,
@@ -97,6 +98,7 @@ router.post("/", requireAuth, async (req, res) => {
     ...req.body,
     author: req.userId,
     date: getCurrentDate(),
+    comments: [],
     reposts: [],
     views: 0,
   };

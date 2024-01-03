@@ -15,13 +15,6 @@ onMounted(async () => {
 });
 
 watchEffect(() => {
-  if (
-    isAuthenticated.value != null &&
-    !isAuthenticated.value &&
-    route.path !== "/register"
-  ) {
-    router.push({ path: "/login" });
-  }
   setTimeout(() => {
     console.log(isAuthenticated.value);
     if (
@@ -33,12 +26,20 @@ watchEffect(() => {
     }
     console.log(auth.login);
   }, 500);
-});
+}, auth);
 </script>
 
 <template>
-  <div v-if="authRequestSent">
+  <div v-if="authRequestSent" class="app-layout">
     <Navbar :isAuthenticated="isAuthenticated"></Navbar>
     <RouterView :key="$route.fullPath"></RouterView>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+</style>
