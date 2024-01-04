@@ -1,6 +1,6 @@
 <template>
   <div id="navbar">
-    <button @click="navigateToHome">Home</button>
+    <button v-if="isAuthenticated" @click="navigateToHome">Home</button>
     <button v-if="isAuthenticated" @click="navigateToAccount">Account</button>
     <button v-if="isAuthenticated" @click="logOut">Logout</button>
     <button v-if="!isAuthenticated" @click="navigateToRegister">

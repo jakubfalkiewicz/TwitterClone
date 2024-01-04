@@ -8,25 +8,12 @@ import { storeToRefs } from "pinia";
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
-const { isAuthenticated, authRequestSent } = storeToRefs(auth);
 
 onMounted(async () => {
   await auth.authenticate();
 });
 
-watchEffect(() => {
-  setTimeout(() => {
-    console.log(isAuthenticated.value);
-    if (
-      isAuthenticated.value != null &&
-      !isAuthenticated.value &&
-      route.path !== "/register"
-    ) {
-      router.push({ path: "/login" });
-    }
-    console.log(auth.login);
-  }, 500);
-}, auth);
+const { isAuthenticated, authRequestSent } = storeToRefs(auth);
 </script>
 
 <template>

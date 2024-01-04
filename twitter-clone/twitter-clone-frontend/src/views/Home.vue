@@ -1,7 +1,7 @@
 <template>
   <div>Feed:</div>
-  <div v-if="posts != null" class="posts-container">
-    <Post v-for="post in posts" :post="post"></Post>
+  <div v-if="Array.isArray(posts)" class="posts-container">
+    <Post v-for="post in posts" :key="post._id" :post="post"></Post>
   </div>
 </template>
 
@@ -14,6 +14,7 @@ const posts = ref(null);
 
 onMounted(async () => {
   const test = await axios.get(`/posts/feed`);
+  console.log(test.data);
   posts.value = test.data;
   console.log(posts.value);
 });

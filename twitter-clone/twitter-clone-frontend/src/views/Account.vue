@@ -7,9 +7,7 @@
           :height="50"
           class="avatar"
           alt=""
-          :src="
-            user.avatar !== undefined ? user.avatar : '../public/avatar.png'
-          "
+          :src="user.avatar !== undefined ? user.avatar : '../media/avatar.png'"
         />
         <div>{{ user.login }}</div>
       </div>

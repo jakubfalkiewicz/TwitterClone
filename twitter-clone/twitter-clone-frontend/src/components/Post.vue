@@ -10,7 +10,7 @@
           :src="
             post.authorAvatar !== undefined
               ? post.authorAvatar
-              : '../public/avatar.png'
+              : '../media/avatar.png'
           "
         />
         <div @click="$router.push(`/user/${post.authorName}`)">
