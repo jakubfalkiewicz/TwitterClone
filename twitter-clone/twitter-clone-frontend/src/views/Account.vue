@@ -7,7 +7,7 @@
           :height="50"
           class="avatar"
           alt=""
-          :src="user.avatar !== undefined ? user.avatar : '../media/avatar.png'"
+          :src="user.avatarUrl"
         />
         <div>{{ user.login }}</div>
       </div>
@@ -34,7 +34,7 @@
     v-if="showForm"
     v-on:close="showForm = !showForm"
     v-on:submitPost="addPost"
-    :userAvatar="user.avatar"
+    :userAvatar="user.avatarUrl"
   ></AddPostForm>
 </template>
 <script setup>
@@ -58,7 +58,7 @@ onMounted(async () => {
   await axios.get(`/users/${username}`).then((res) => {
     user.value = res.data;
   });
-  await axios.get(`/posts/${user.value._id}`).then((res) => {
+  await axios.get(`/posts/byUser/${user.value._id}`).then((res) => {
     posts.value = res.data;
   });
   followed.value = follows?.includes(user.value._id);

@@ -65,7 +65,39 @@ router.get("/feed", requireAuth, async (req, res) => {
   }
 });
 
-router.get("/:userId", requireAuth, async (req, res) => {
+router.get("/:postId", requireAuth, async (req, res) => {
+  const postId = req.params.postId;
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found", code: 404 });
+    }
+    await Post.populate(post, { path: "author" });
+
+    const formattedPost = {
+      _id: post._id,
+      author: post.author._id,
+      authorAvatar: post.author.avatarUrl,
+      authorName: post.author.login,
+      date: post.date,
+      text: post.text,
+      photo: post.photo,
+      reposts: post.reposts,
+      views: post.views,
+      comments: post.comments,
+    };
+
+    res.json(formattedPost);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({
+      post: "Failed to get the posts",
+      code: 500,
+    });
+  }
+});
+
+router.get("/byUser/:userId", requireAuth, async (req, res) => {
   const userId = req.params.userId;
   try {
     const posts = await Post.find({ author: userId });

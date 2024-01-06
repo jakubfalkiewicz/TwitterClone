@@ -1,26 +1,23 @@
 <template>
-  <div class="post">
+  <div class="post" @click="$router.push(`/post/${post._id}`)">
     <div class="post-headline">
-      <div class="post-user">
+      <div class="post-user" @click="$router.push(`/user/${post.authorName}`)">
         <img
           :width="30"
           :height="30"
           class="avatar"
           alt=""
-          :src="
-            post.authorAvatar !== undefined
-              ? post.authorAvatar
-              : '../media/avatar.png'
-          "
+          :src="post.authorAvatar"
         />
-        <div @click="$router.push(`/user/${post.authorName}`)">
+        <div>
           {{ post.authorName }}
         </div>
       </div>
       <div>{{ post.date }}</div>
     </div>
     <div>
-      {{ post.text.slice(0, 100) + (post.text.length > 100 ? "..." : "") }}
+      <!-- {{ post.text.slice(0, 100) + (post.text.length > 100 ? "..." : "") }} -->
+      {{ post.text }}
     </div>
     <div class="post-metadata">
       <div>Comments: {{ post.comments?.length }}</div>
@@ -31,6 +28,8 @@
 </template>
 <script setup>
 defineProps(["post"]);
+import { useRouter } from "vue-router";
+const router = useRouter();
 </script>
 
 <style lang="scss" scoped>
@@ -41,9 +40,10 @@ defineProps(["post"]);
   padding: 1rem;
   border-radius: 1rem;
   min-width: 250px;
-  max-width: 400px;
+  max-width: 600px;
   text-align: start;
   gap: 0.5rem;
+  width: 100%;
   .post-headline {
     display: flex;
     align-items: center;
@@ -53,6 +53,7 @@ defineProps(["post"]);
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      z-index: 2;
       .avatar {
         border-radius: 100%;
       }

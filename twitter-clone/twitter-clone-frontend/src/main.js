@@ -8,12 +8,14 @@ import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
 import NotFound from "./views/NotFound.vue";
 import Account from "./views/Account.vue";
+import Post from "./views/Post.vue";
 
 const routes = [
   { path: "/", component: Home },
   { path: "/login", component: Login },
   { path: "/register", component: Register },
   { path: "/user/:username", component: Account },
+  { path: "/post/:postId", component: Post },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
 ];
 

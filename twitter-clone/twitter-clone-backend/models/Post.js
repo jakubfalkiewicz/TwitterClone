@@ -8,14 +8,14 @@ const postSchema = new Schema({
   date: { type: String, required: true },
   text: { type: String, required: true },
   photo: { type: String, required: false },
-  comments: [
-    {
-      user: String,
-      text: String,
-      date: String,
-    },
-  ],
-  reposts: [String],
+  type: {
+    type: String,
+    enum: ["post", "comment"],
+    default: "post",
+  },
+  comments: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+  reposts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+  initialPost: { type: Schema.Types.ObjectId, ref: "Post", required: false },
   views: { type: Number, required: true },
 });
 

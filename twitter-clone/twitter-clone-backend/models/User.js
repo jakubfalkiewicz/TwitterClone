@@ -16,11 +16,8 @@ const userSchema = new Schema({
 
 // Virtual property to generate avatarUrl
 userSchema.virtual("avatarUrl").get(function () {
-  if (this.avatar) {
-    return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${this.avatar}`;
-  }
-  // You can return a default URL or handle it as per your requirement
-  return undefined;
+  let avatar = this.avatar ? this.avatar : "avatar.png";
+  return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${avatar}`;
 });
 
 userSchema.pre("save", async function (next) {
