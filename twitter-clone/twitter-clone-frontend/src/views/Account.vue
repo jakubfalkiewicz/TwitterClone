@@ -25,7 +25,6 @@
         +
       </button>
     </div>
-    <!-- TODO: Separate component -->
     <div v-for="post in posts" v-if="posts != null" class="posts-container">
       <Post :post="post"></Post>
     </div>

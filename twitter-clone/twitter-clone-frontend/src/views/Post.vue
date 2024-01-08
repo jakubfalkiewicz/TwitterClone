@@ -1,6 +1,6 @@
 <template>
-  <div class="post">
-    <Post v-if="post !== null" :post="post"></Post>
+  <div class="posts">
+    <Post v-if="post !== null" :post="post" :commentSection="true"></Post>
   </div>
 </template>
 
@@ -27,3 +27,11 @@ onMounted(async () => {
   //   followed.value = follows?.includes(user.value._id);
 });
 </script>
+
+<style lang="scss" scoped>
+.posts {
+  display: flex;
+  width: 60%;
+  justify-content: center;
+}
+</style>

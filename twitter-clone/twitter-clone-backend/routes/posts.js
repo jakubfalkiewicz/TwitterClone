@@ -3,6 +3,7 @@ const router = express.Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
 const requireAuth = require("../auth/authMiddleware");
+var Promise = require("bluebird");
 
 const getCurrentDate = () => {
   var dateTime = new Date();
@@ -68,11 +69,11 @@ router.get("/feed", requireAuth, async (req, res) => {
 router.get("/:postId", requireAuth, async (req, res) => {
   const postId = req.params.postId;
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate("author");
+    // await post.populateComments();
     if (!post) {
       return res.status(404).json({ message: "Post not found", code: 404 });
     }
-    await Post.populate(post, { path: "author" });
 
     const formattedPost = {
       _id: post._id,
@@ -135,11 +136,16 @@ router.post("/", requireAuth, async (req, res) => {
     views: 0,
   };
   try {
-    Post.create(post);
+    const dbPost = await Post.create(post);
+    if (post.type === "comment") {
+      const initialPost = await Post.findById(dbPost.initialPost);
+      initialPost.comments = [...initialPost.comments, dbPost._id];
+      await initialPost.save();
+    }
     res.send(post);
   } catch (error) {
     res.status(400);
-    res.end(error);
+    res.end(error.message);
   }
 });
 
