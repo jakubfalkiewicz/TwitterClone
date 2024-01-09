@@ -34,6 +34,8 @@
     v-on:close="showForm = !showForm"
     v-on:submitPost="addPost"
     :userAvatar="user.avatarUrl"
+    :postType="'post'"
+    :initialPost="null"
   ></AddPostForm>
 </template>
 <script setup>
@@ -59,6 +61,7 @@ onMounted(async () => {
   });
   await axios.get(`/posts/byUser/${user.value._id}`).then((res) => {
     posts.value = res.data;
+    console.log(posts.value);
   });
   followed.value = follows?.includes(user.value._id);
 });

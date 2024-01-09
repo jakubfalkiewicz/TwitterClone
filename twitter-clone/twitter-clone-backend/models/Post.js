@@ -5,18 +5,38 @@ const postSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
+  comments: [{ type: Schema.Types.ObjectId, ref: "Post" }],
   date: { type: String, required: true },
-  text: { type: String, required: true },
+  initialPost: {
+    type: Schema.Types.ObjectId,
+    ref: "Post",
+  },
   photo: { type: String, required: false },
+  reposts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+  text: { type: String, required: true },
   type: {
     type: String,
     enum: ["post", "comment"],
     default: "post",
   },
-  comments: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-  reposts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-  initialPost: { type: Schema.Types.ObjectId, ref: "Post", required: false },
   views: { type: Number, required: true },
 });
+
+var autoPopulateFields = function (next) {
+  try {
+    this.populate({
+      path: "author",
+      select: "login avatarUrl follows blocked",
+    });
+    this.populate("comments");
+    // this.populate("initialPost");
+  } catch (err) {
+    console.log(err.message);
+  }
+
+  next();
+};
+
+postSchema.pre("find", autoPopulateFields).pre("findOne", autoPopulateFields);
 
 module.exports = model("Post", postSchema);

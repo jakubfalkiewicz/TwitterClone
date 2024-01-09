@@ -11,10 +11,10 @@
             :height="30"
             class="avatar"
             alt=""
-            :src="post.authorAvatar"
+            :src="post.author.avatarUrl || post.authorAvatar"
           />
           <div>
-            {{ post.authorName }}
+            {{ post.author.login || post.authorName }}
           </div>
         </div>
         <div>{{ post.date }}</div>
@@ -33,7 +33,7 @@
       <input v-model="replyText" placeholder="Reply" />
       <button type="submit" @click="submitReply">SUBMIT REPLY</button>
     </div>
-    <div v-for="comment in post.comments">
+    <div v-if="commentSection === true" v-for="comment in post.comments">
       <Post :post="comment"></Post>
     </div>
   </div>
@@ -84,6 +84,7 @@ const elementClick = (el, postId) => {
   display: flex;
   flex-direction: column;
   background-color: rebeccapurple;
+  width: 100%;
   .post {
     display: flex;
     flex-direction: column;

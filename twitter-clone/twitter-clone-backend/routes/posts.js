@@ -3,7 +3,6 @@ const router = express.Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
 const requireAuth = require("../auth/authMiddleware");
-var Promise = require("bluebird");
 
 const getCurrentDate = () => {
   var dateTime = new Date();
@@ -57,6 +56,8 @@ router.get("/feed", requireAuth, async (req, res) => {
       reposts: post.reposts,
       views: post.views,
       comments: post.comments,
+      type: post.type,
+      initialPost: post.initialPost,
     }));
 
     res.json(formattedPosts);
@@ -69,26 +70,13 @@ router.get("/feed", requireAuth, async (req, res) => {
 router.get("/:postId", requireAuth, async (req, res) => {
   const postId = req.params.postId;
   try {
-    const post = await Post.findById(postId).populate("author");
-    // await post.populateComments();
+    const post = await Post.findById(postId);
+    // .populate("initialPost");
+
     if (!post) {
       return res.status(404).json({ message: "Post not found", code: 404 });
     }
-
-    const formattedPost = {
-      _id: post._id,
-      author: post.author._id,
-      authorAvatar: post.author.avatarUrl,
-      authorName: post.author.login,
-      date: post.date,
-      text: post.text,
-      photo: post.photo,
-      reposts: post.reposts,
-      views: post.views,
-      comments: post.comments,
-    };
-
-    res.json(formattedPost);
+    res.json(post);
   } catch (err) {
     console.log(err.message);
     res.status(500).json({
@@ -101,12 +89,15 @@ router.get("/:postId", requireAuth, async (req, res) => {
 router.get("/byUser/:userId", requireAuth, async (req, res) => {
   const userId = req.params.userId;
   try {
-    const posts = await Post.find({ author: userId });
-    await Post.populate(posts, { path: "author" });
+    const posts = await Post.find({ author: userId })
+      .populate("author")
+      .populate("comments")
+      .populate("initialPost");
 
     const formattedPosts = posts.map((post) => ({
       _id: post._id,
-      author: post.author._id,
+      author: post.author,
+      //TODO: Check if needed
       authorAvatar: post.author.avatarUrl,
       authorName: post.author.login,
       date: post.date,
@@ -115,10 +106,13 @@ router.get("/byUser/:userId", requireAuth, async (req, res) => {
       reposts: post.reposts,
       views: post.views,
       comments: post.comments,
+      type: post.type,
+      initialPost: post.initialPost,
     }));
 
     res.json(formattedPosts);
   } catch (err) {
+    console.log(err.message);
     res.status(500).json({
       post: "Failed to get the posts",
       code: 500,
@@ -127,6 +121,7 @@ router.get("/byUser/:userId", requireAuth, async (req, res) => {
 });
 
 router.post("/", requireAuth, async (req, res) => {
+  console.log(req.body);
   const post = {
     ...req.body,
     author: req.userId,
@@ -142,10 +137,22 @@ router.post("/", requireAuth, async (req, res) => {
       initialPost.comments = [...initialPost.comments, dbPost._id];
       await initialPost.save();
     }
-    res.send(post);
+    await Post.findById(dbPost._id);
+    res.send(dbPost);
   } catch (error) {
+    console.log(error.message);
     res.status(400);
     res.end(error.message);
+  }
+});
+
+router.delete("/:postId", async (req, res) => {
+  try {
+    const dbPost = await Post.findById(req.params.postId);
+    dbPost.delete();
+    res.send("Post deleted successfully");
+  } catch (err) {
+    res.send(err.message);
   }
 });
 
