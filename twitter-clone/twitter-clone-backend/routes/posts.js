@@ -70,8 +70,10 @@ router.get("/feed", requireAuth, async (req, res) => {
 router.get("/:postId", requireAuth, async (req, res) => {
   const postId = req.params.postId;
   try {
-    const post = await Post.findById(postId);
-    // .populate("initialPost");
+    const post = await Post.findById(postId).populate({
+      path: "comments",
+      select: { initialPost: 0 },
+    });
 
     if (!post) {
       return res.status(404).json({ message: "Post not found", code: 404 });

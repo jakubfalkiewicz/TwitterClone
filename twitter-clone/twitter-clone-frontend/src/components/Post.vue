@@ -85,6 +85,8 @@ const elementClick = (el, postId) => {
   flex-direction: column;
   background-color: rebeccapurple;
   width: 100%;
+  align-items: center;
+  padding: 1rem;
   .post {
     display: flex;
     flex-direction: column;

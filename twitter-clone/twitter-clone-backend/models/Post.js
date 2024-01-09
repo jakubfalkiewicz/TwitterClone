@@ -28,12 +28,13 @@ var autoPopulateFields = function (next) {
       path: "author",
       select: "login avatarUrl follows blocked",
     });
-    this.populate("comments");
-    // this.populate("initialPost");
+    // this.populate({ path: "comments", select: { initialPost: 0 } });
+    this.populate({
+      path: "initialPost",
+    });
   } catch (err) {
     console.log(err.message);
   }
-
   next();
 };
 
