@@ -9,6 +9,7 @@ import Register from "./views/Register.vue";
 import NotFound from "./views/NotFound.vue";
 import Account from "./views/Account.vue";
 import Post from "./views/Post.vue";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 const routes = [
   { path: "/", component: Home },

@@ -35,32 +35,12 @@ router.get("/", async (req, res) => {
 
 router.get("/feed", requireAuth, async (req, res) => {
   const userId = req.userId;
-
   try {
     const user = await User.findById(userId).populate("follows");
-
     const followerIds = user.follows.map((follower) => follower._id);
-
     const posts = await Post.find({ author: { $in: followerIds } });
 
-    await Post.populate(posts, { path: "author" });
-
-    const formattedPosts = posts.map((post) => ({
-      _id: post._id,
-      author: post.author._id,
-      authorName: post.author.login,
-      authorAvatar: post.author.avatarUrl,
-      date: post.date,
-      text: post.text,
-      photo: post.photo,
-      reposts: post.reposts,
-      views: post.views,
-      comments: post.comments,
-      type: post.type,
-      initialPost: post.initialPost,
-    }));
-
-    res.json(formattedPosts);
+    res.json(posts);
   } catch (error) {
     console.error("Error fetching tweets:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -91,28 +71,9 @@ router.get("/:postId", requireAuth, async (req, res) => {
 router.get("/byUser/:userId", requireAuth, async (req, res) => {
   const userId = req.params.userId;
   try {
-    const posts = await Post.find({ author: userId })
-      .populate("author")
-      .populate("comments")
-      .populate("initialPost");
+    const posts = await Post.find({ author: userId });
 
-    const formattedPosts = posts.map((post) => ({
-      _id: post._id,
-      author: post.author,
-      //TODO: Check if needed
-      authorAvatar: post.author.avatarUrl,
-      authorName: post.author.login,
-      date: post.date,
-      text: post.text,
-      photo: post.photo,
-      reposts: post.reposts,
-      views: post.views,
-      comments: post.comments,
-      type: post.type,
-      initialPost: post.initialPost,
-    }));
-
-    res.json(formattedPosts);
+    res.json(posts);
   } catch (err) {
     console.log(err.message);
     res.status(500).json({

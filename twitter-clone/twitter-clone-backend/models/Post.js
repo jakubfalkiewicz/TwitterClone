@@ -26,7 +26,7 @@ var autoPopulateFields = function (next) {
   try {
     this.populate({
       path: "author",
-      select: "login avatarUrl follows blocked",
+      select: "login avatar follows blocked",
     });
     // this.populate({ path: "comments", select: { initialPost: 0 } });
     this.populate({

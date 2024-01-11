@@ -25,9 +25,14 @@
         +
       </button>
     </div>
-    <div v-for="post in posts" v-if="posts != null" class="posts-container">
-      <Post :post="post"></Post>
-    </div>
+    <!-- <div v-for="post in posts" v-if="posts != null" class="posts-container"> -->
+    <Post
+      v-for="post in posts"
+      v-if="posts != null"
+      class="posts-container"
+      :post="post"
+    ></Post>
+    <!-- </div> -->
   </div>
   <AddPostForm
     v-if="showForm"
@@ -86,14 +91,13 @@ const unfollowUser = async (e) => {
 #account {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1rem;
   padding: 1rem;
+  width: 60%;
 }
 .posts-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
 }
 .avatar {
   border-radius: 100%;

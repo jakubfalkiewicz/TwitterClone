@@ -36,5 +36,6 @@ userSchema.pre("save", async function (next) {
 
 // Exclude virtuals when converting to JSON
 userSchema.set("toJSON", { virtuals: true });
+userSchema.set("toObject", { virtuals: true });
 
 module.exports = model("User", userSchema);

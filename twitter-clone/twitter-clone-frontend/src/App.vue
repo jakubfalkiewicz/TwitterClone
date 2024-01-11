@@ -1,6 +1,6 @@
 <script setup>
 import { RouterView, useRouter, useRoute } from "vue-router";
-import { onMounted, watchEffect, computed, ref } from "vue";
+import { onMounted, watch } from "vue";
 import Navbar from "./components/Navbar.vue";
 import useAuthStore from "./stores/AuthStore";
 import { storeToRefs } from "pinia";
@@ -8,18 +8,33 @@ import { storeToRefs } from "pinia";
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
+const { authRequestSent, isAuthenticated } = storeToRefs(auth);
 
 onMounted(async () => {
   await auth.authenticate();
+  if (authRequestSent.value && !isAuthenticated.value) {
+    router.push("/login");
+  }
 });
 
-const { isAuthenticated, authRequestSent } = storeToRefs(auth);
+watch(
+  () => route.fullPath,
+  async () => {
+    if (
+      !isAuthenticated.value &&
+      route.fullPath !== "/register" &&
+      authRequestSent.value
+    ) {
+      router.push("/login");
+    }
+  }
+);
 </script>
 
 <template>
-  <div v-if="authRequestSent" class="app-layout">
+  <div class="app-layout">
     <Navbar :isAuthenticated="isAuthenticated"></Navbar>
-    <RouterView :key="$route.fullPath"></RouterView>
+    <RouterView :key="route.fullPath"></RouterView>
   </div>
 </template>
 

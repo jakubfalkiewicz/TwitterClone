@@ -1,6 +1,11 @@
 <template>
   <div class="posts">
-    <Post v-if="post !== null" :post="post" :commentSection="true"></Post>
+    <Post
+      v-if="post !== null"
+      :showInitial="true"
+      :post="post"
+      :commentSection="true"
+    ></Post>
   </div>
 </template>
 

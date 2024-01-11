@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "axios": "^1.6.2",
-    "oh-vue-icons": "^1.0.0-rc3",
+    "bootstrap-icons": "^1.11.3",
     "pinia": "^2.1.7",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5"

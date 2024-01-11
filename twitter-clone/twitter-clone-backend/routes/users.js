@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
 
 router.get("/authenticate", requireAuth, async (req, res) => {
   try {
-    console.log(req.login);
+    console.log("login: " + req.login);
     const user = await User.findOne({ login: req.login });
     res.status(200).json(user);
   } catch (e) {
