@@ -33,7 +33,7 @@
             <i class="bi bi-chat-left-text"></i>
             {{ post.comments?.length }}
           </div>
-          <div class="post-metadata">
+          <div class="post-metadata" @click="showRepostForm = !showRepostForm">
             <i class="bi bi-repeat"></i> {{ post.reposts?.length }}
           </div>
           <div class="post-metadata">
@@ -50,6 +50,10 @@
       </div>
     </div>
   </div>
+  <AddPost
+    v-if="showRepostForm"
+    v-on:closeForm="showRepostForm = !showRepostForm"
+  ></AddPost>
 </template>
 <script setup>
 defineProps({
@@ -61,12 +65,19 @@ import { useRouter, useRoute } from "vue-router";
 import useAuthStore from "../stores/AuthStore";
 import { ref, onMounted } from "vue";
 import axios from "../api/axios";
+import AddPost from "./AddPost.vue";
 
 const router = useRouter();
 const route = useRoute();
 const { follows, login } = useAuthStore();
 const user = ref(null);
 const replyText = ref("");
+const showRepostForm = ref(false);
+
+const aaa = () => {
+  showRepostForm.value = !showRepostForm.value;
+  console.log("dupa");
+};
 
 onMounted(async () => {
   await axios.get(`/users/${login}`).then((res) => {
@@ -94,8 +105,7 @@ function hasClassInAncestors(element, className) {
 }
 
 const elementClick = (el, postId) => {
-  if (hasClassInAncestors(el, "post-metadata-container")) {
-    console.log("YEA");
+  if (hasClassInAncestors(el, "post-metadata")) {
     return;
   }
   if (!hasClassInAncestors(el, "post-user")) {
@@ -108,6 +118,7 @@ const elementClick = (el, postId) => {
 .post-component {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1rem;
   width: 100%;
   .post-container {
@@ -123,7 +134,6 @@ const elementClick = (el, postId) => {
       flex-direction: column;
       background: black;
       padding: 1rem;
-      border-radius: 1rem;
       text-align: start;
       gap: 0.5rem;
       .post-headline {
@@ -135,7 +145,6 @@ const elementClick = (el, postId) => {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          z-index: 2;
           .avatar {
             border-radius: 100%;
           }
