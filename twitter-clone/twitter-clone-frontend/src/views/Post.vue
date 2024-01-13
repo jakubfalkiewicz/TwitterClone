@@ -38,5 +38,8 @@ onMounted(async () => {
   display: flex;
   width: 60%;
   justify-content: center;
+  @media (max-width: 768px) {
+    width: 90%;
+  }
 }
 </style>

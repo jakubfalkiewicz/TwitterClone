@@ -1,19 +1,23 @@
 <template>
-  <div id="register">
-    <div>Register</div>
+  <div id="edit-user">
+    <div>Edit user</div>
     <input v-model="login" placeholder="Login" />
     <input v-model="password" placeholder="Password" type="password" />
-    <input v-on:change="handleFileUpload($event)" type="file" />
-    <button @click="apiRegister">Register</button>
+    <div>
+      Avatar: <input v-on:change="handleFileUpload($event)" type="file" />
+    </div>
+
+    <button @click="updateUserAvatar">Update account</button>
   </div>
 </template>
 
 <script setup>
 import axios from "../api/axios";
 import { ref } from "vue";
+defineProps(["propLogin"]);
 
-let login = "";
-let password = "";
+let login = null;
+let password = null;
 const file = ref(null);
 const formData = new FormData();
 
@@ -23,11 +27,11 @@ const handleFileUpload = (event) => {
   formData.append("file", file.value);
 };
 
-const apiRegister = async () => {
+const updateUserAvatar = async () => {
   formData.append("login", login);
   formData.append("password", password);
   try {
-    await axios.post("/users/register", formData, {
+    await axios.put("/users/", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -38,4 +42,15 @@ const apiRegister = async () => {
   }
 };
 </script>
-<style scoped></style>
+<style scoped>
+#edit-user {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 500px;
+  input {
+    font-size: 1rem;
+  }
+}
+</style>

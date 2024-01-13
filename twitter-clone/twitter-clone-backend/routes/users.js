@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
 const User = require("../models/User");
 const passport = require("../auth/passportConfig");
 const requireAuth = require("../auth/authMiddleware");
 const upload = require("../multerMiddleware/uploadAvatar");
+const bcrypt = require("bcrypt");
 
 router.get("/", async (req, res) => {
   try {
@@ -31,12 +31,32 @@ router.get("/authenticate", requireAuth, async (req, res) => {
 
 router.post("/register", upload.single("file"), async (req, res) => {
   try {
-    const user = { ...req.body, avatar: req.file.filename };
+    const user = { ...req.body, avatar: req.file?.filename };
     User.create(user);
     res.send(user);
   } catch (error) {
     res.status(400).send(error.message);
   }
+});
+
+router.put("/", requireAuth, upload.single("file"), async (req, res) => {
+  const user = await User.findOne({ login: req.login });
+  let hashedPassword;
+  console.log(req.body.password);
+  if (req.body.password !== null && !Array.isArray(req.body.password)) {
+    console.log("HASHED AGAIN");
+    // const salt = await bcrypt.genSalt(10);
+    // hashedPassword = await bcrypt.hash(req.body.password, salt);
+  }
+  // const updatedUser = await User.findOneAndUpdate(
+  //   { login: req.login },
+  //   {
+  //     login: req.body.login || user.login,
+  //     password: hashedPassword || user.password,
+  //   }
+  // );
+  // console.log(updatedUser);
+  // return res.json(user);
 });
 
 router.post("/login", (req, res, next) => {
@@ -114,18 +134,6 @@ router.get("/:username", requireAuth, async (req, res) => {
       code: 500,
     });
   }
-});
-
-router.put("/:userId", async (req, res) => {
-  const id = req.params.userId;
-  const user = User.find({ _id: id });
-  const filter = { _id: id };
-  const update = {
-    login: req.body.login || user.login,
-    email: req.body.email || user.email,
-  };
-  const updatedUser = await User.findByIdAndUpdate(filter, update);
-  return res.send({ updatedUser: updatedUser });
 });
 
 router.delete("/deleteAll", async (req, res) => {

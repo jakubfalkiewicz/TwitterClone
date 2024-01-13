@@ -1,7 +1,7 @@
 <template>
   <div class="post-component">
     <Post
-      v-if="post.initialPost && showInitial"
+      v-if="post.initialPost && showInitial && post.type !== 'post'"
       :showInitial="true"
       :post="post.initialPost"
     ></Post>
@@ -60,12 +60,13 @@
           </div>
         </div>
       </div>
-      <div v-if="commentSection === true">
+      <div class="reply-row" v-if="commentSection === true">
         <input v-model="replyText" placeholder="Reply" />
         <button type="submit" @click="submitReply">SUBMIT REPLY</button>
       </div>
       <div v-if="commentSection === true" v-for="comment in post.comments">
         <Post :post="comment"></Post>
+        <div class="separator"></div>
       </div>
     </div>
   </div>
@@ -77,7 +78,7 @@
   ></AddPost>
 </template>
 <script setup>
-defineProps({
+const props = defineProps({
   post: { type: Object, required: true },
   commentSection: { type: Boolean, default: false },
   showInitial: { type: Boolean, default: false },
@@ -91,7 +92,7 @@ import AddPost from "./AddPost.vue";
 
 const router = useRouter();
 const route = useRoute();
-const { follows, login } = useAuthStore();
+const { login } = useAuthStore();
 const user = ref(null);
 const replyText = ref("");
 const showRepostForm = ref(false);
@@ -104,12 +105,13 @@ onMounted(async () => {
 });
 
 const submitReply = async () => {
-  await axios.post(`/posts/`, {
+  const reply = await axios.post(`/posts/`, {
     text: replyText.value,
     photo: null,
     type: "comment",
     initialPost: route.params.postId,
   });
+  props.post.comments.push(reply.data);
 };
 
 function hasClassInAncestors(element, className) {
@@ -148,7 +150,10 @@ const elementClick = (el, postId) => {
     background-color: rebeccapurple;
     width: 100%;
     max-width: 800px;
-    min-width: 250px;
+    min-width: 300px;
+    .reply-row {
+      padding: 0.5rem;
+    }
     .post {
       display: flex;
       flex-grow: 1;
@@ -173,6 +178,9 @@ const elementClick = (el, postId) => {
             border-radius: 100%;
           }
         }
+        .post-user:hover {
+          cursor: pointer;
+        }
       }
       .post-metadata-container {
         display: flex;
@@ -188,5 +196,32 @@ const elementClick = (el, postId) => {
       }
     }
   }
+  .separator {
+    height: 0;
+    border-bottom: 1px solid white;
+    width: 100%;
+  }
+  @media (max-width: 768px) {
+    .post-container {
+      min-width: auto;
+    }
+  }
 }
+
+// @media  (max-width: 768px) {
+//   .post-component {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     gap: 2rem;
+//     width: 100%;
+//     .post-container {
+//       display: flex;
+//       flex-direction: column;
+//       background-color: rebeccapurple;
+//       width: 100%;
+//       max-width: 800px;
+//     }
+//   }
+// }
 </style>

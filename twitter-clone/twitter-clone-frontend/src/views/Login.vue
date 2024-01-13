@@ -26,7 +26,7 @@ const apiLogin = async () => {
     auth.logIn(response.data);
     router.push({ path: `/user/${response.data.login}` });
   } catch (error) {
-    console.error(error.response.data);
+    alert(error.response.data.message);
   }
 };
 </script>

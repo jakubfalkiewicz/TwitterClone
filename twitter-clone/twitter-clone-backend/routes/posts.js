@@ -84,7 +84,6 @@ router.get("/byUser/:userId", requireAuth, async (req, res) => {
 });
 
 router.post("/", requireAuth, async (req, res) => {
-  console.log(req.body);
   const post = {
     ...req.body,
     author: req.userId,
@@ -105,8 +104,8 @@ router.post("/", requireAuth, async (req, res) => {
       initialPost.reposts = [...initialPost.reposts, dbPost._id];
       await initialPost.save();
     }
-    await Post.findById(dbPost._id);
-    res.send(dbPost);
+    const populatedPost = await Post.findById(dbPost._id);
+    res.send(populatedPost);
   } catch (error) {
     console.log(error.message);
     res.status(400);
