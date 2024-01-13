@@ -1,12 +1,21 @@
 <template>
   <div id="navbar">
-    <button v-if="isAuthenticated" @click="navigateToHome">Home</button>
-    <button v-if="isAuthenticated" @click="navigateToAccount">Account</button>
-    <button v-if="isAuthenticated" @click="logOut">Logout</button>
-    <button v-if="!isAuthenticated" @click="navigateToRegister">
-      Register
-    </button>
-    <button v-if="!isAuthenticated" @click="navigateToLogin">Login</button>
+    <div class="navbar-row-1">
+      <button v-if="isAuthenticated" @click="navigateToHome">Home</button>
+      <button v-if="isAuthenticated" @click="navigateToAccount">Account</button>
+      <button v-if="isAuthenticated" @click="logOut">Logout</button>
+      <button v-if="!isAuthenticated" @click="navigateToRegister">
+        Register
+      </button>
+      <button v-if="!isAuthenticated" @click="navigateToLogin">Login</button>
+    </div>
+    <div class="navbar-row-2">
+      <i
+        v-if="isAuthenticated"
+        class="bi bi-arrow-return-left"
+        @click="router.go(-1)"
+      ></i>
+    </div>
   </div>
 </template>
 <script setup>
@@ -37,10 +46,26 @@ const logOut = async () => {
   router.push({ path: "/login" });
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
 #navbar {
   display: flex;
+  flex-direction: column;
   width: 100%;
-  justify-content: space-between;
+  .navbar-row-1 {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .navbar-row-2 {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+  }
+  .bi-arrow-return-left {
+    font-size: 1.5rem;
+  }
+  .bi-arrow-return-left:hover {
+    cursor: pointer;
+  }
 }
 </style>

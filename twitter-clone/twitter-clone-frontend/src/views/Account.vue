@@ -26,12 +26,7 @@
       </button>
     </div>
     <!-- <div v-for="post in posts" v-if="posts != null" class="posts-container"> -->
-    <Post
-      v-for="post in posts"
-      v-if="posts != null"
-      class="posts-container"
-      :post="post"
-    ></Post>
+    <Post v-for="post in posts" v-if="posts != null" :post="post"></Post>
     <!-- </div> -->
   </div>
   <AddPostForm

@@ -28,12 +28,31 @@
         <div>
           {{ post.text }}
         </div>
-        <div class="post-metadata-container">
-          <div class="post-metadata">
+        <div
+          class="post-wrapper"
+          @click="router.push(`/post/${post.initialPost._id}`)"
+          v-if="post.type === 'post' && post.initialPost !== null"
+        >
+          <Post :post="post.initialPost" :show-metadata="false"></Post>
+        </div>
+        <div v-if="showMetadata" class="post-metadata-container">
+          <div
+            class="post-metadata"
+            @click="
+              repostType = 'comment';
+              showRepostForm = !showRepostForm;
+            "
+          >
             <i class="bi bi-chat-left-text"></i>
             {{ post.comments?.length }}
           </div>
-          <div class="post-metadata" @click="showRepostForm = !showRepostForm">
+          <div
+            class="post-metadata"
+            @click="
+              repostType = 'post';
+              showRepostForm = !showRepostForm;
+            "
+          >
             <i class="bi bi-repeat"></i> {{ post.reposts?.length }}
           </div>
           <div class="post-metadata">
@@ -53,6 +72,8 @@
   <AddPost
     v-if="showRepostForm"
     v-on:closeForm="showRepostForm = !showRepostForm"
+    :initial-post="post"
+    :post-type="repostType"
   ></AddPost>
 </template>
 <script setup>
@@ -60,6 +81,7 @@ defineProps({
   post: { type: Object, required: true },
   commentSection: { type: Boolean, default: false },
   showInitial: { type: Boolean, default: false },
+  showMetadata: { type: Boolean, default: true },
 });
 import { useRouter, useRoute } from "vue-router";
 import useAuthStore from "../stores/AuthStore";
@@ -73,11 +95,7 @@ const { follows, login } = useAuthStore();
 const user = ref(null);
 const replyText = ref("");
 const showRepostForm = ref(false);
-
-const aaa = () => {
-  showRepostForm.value = !showRepostForm.value;
-  console.log("dupa");
-};
+const repostType = ref("");
 
 onMounted(async () => {
   await axios.get(`/users/${login}`).then((res) => {
@@ -105,7 +123,10 @@ function hasClassInAncestors(element, className) {
 }
 
 const elementClick = (el, postId) => {
-  if (hasClassInAncestors(el, "post-metadata")) {
+  if (
+    hasClassInAncestors(el, "post-metadata") ||
+    hasClassInAncestors(el, "post-wrapper")
+  ) {
     return;
   }
   if (!hasClassInAncestors(el, "post-user")) {
@@ -136,6 +157,9 @@ const elementClick = (el, postId) => {
       padding: 1rem;
       text-align: start;
       gap: 0.5rem;
+      .post-wrapper {
+        border: 1px solid white;
+      }
       .post-headline {
         display: flex;
         align-items: center;
@@ -157,6 +181,9 @@ const elementClick = (el, postId) => {
           display: flex;
           align-items: center;
           gap: 0.5rem;
+        }
+        .post-metadata:hover {
+          cursor: pointer;
         }
       }
     }

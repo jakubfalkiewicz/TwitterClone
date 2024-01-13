@@ -100,6 +100,11 @@ router.post("/", requireAuth, async (req, res) => {
       initialPost.comments = [...initialPost.comments, dbPost._id];
       await initialPost.save();
     }
+    if (post.type === "post") {
+      const initialPost = await Post.findById(dbPost.initialPost);
+      initialPost.reposts = [...initialPost.reposts, dbPost._id];
+      await initialPost.save();
+    }
     await Post.findById(dbPost._id);
     res.send(dbPost);
   } catch (error) {
