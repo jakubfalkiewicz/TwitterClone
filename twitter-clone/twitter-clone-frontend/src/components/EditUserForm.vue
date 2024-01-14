@@ -16,8 +16,8 @@ import axios from "../api/axios";
 import { ref } from "vue";
 defineProps(["propLogin"]);
 
-let login = null;
-let password = null;
+let login = "";
+let password = "";
 const file = ref(null);
 const formData = new FormData();
 
@@ -28,17 +28,21 @@ const handleFileUpload = (event) => {
 };
 
 const updateUserAvatar = async () => {
-  formData.append("login", login);
-  formData.append("password", password);
+  if (login) {
+    formData.append("login", login);
+  }
+  if (password) {
+    formData.append("password", password);
+  }
   try {
-    await axios.put("/users/", formData, {
+    const response = await axios.put("/users/", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    window.location.href = "/login";
+    console.log(response);
   } catch (error) {
-    console.error(error.message);
+    alert(error.response.data);
   }
 };
 </script>

@@ -40,23 +40,34 @@ router.post("/register", upload.single("file"), async (req, res) => {
 });
 
 router.put("/", requireAuth, upload.single("file"), async (req, res) => {
-  const user = await User.findOne({ login: req.login });
-  let hashedPassword;
-  console.log(req.body.password);
-  if (req.body.password !== null && !Array.isArray(req.body.password)) {
-    console.log("HASHED AGAIN");
-    // const salt = await bcrypt.genSalt(10);
-    // hashedPassword = await bcrypt.hash(req.body.password, salt);
+  try {
+    const user = await User.findOne({ login: req.login });
+    let hashedPassword;
+    console.log(req.body);
+    if (req.body?.password && !Array.isArray(req.body?.password)) {
+      console.log("HASHED AGAIN");
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(req.body.password, salt);
+    }
+    await User.findOneAndUpdate(
+      { login: req.login },
+      {
+        login: req.body?.login ? req.body.login : user.login,
+        password: hashedPassword || user.password,
+      }
+    )
+      .then((res) => {
+        return res.json("Success");
+      })
+      .catch((err) => {
+        if (err.code === 11000 && err.codeName === "DuplicateKey") {
+          return res.status(500).send("The username is already taken");
+        }
+      });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err.message);
   }
-  // const updatedUser = await User.findOneAndUpdate(
-  //   { login: req.login },
-  //   {
-  //     login: req.body.login || user.login,
-  //     password: hashedPassword || user.password,
-  //   }
-  // );
-  // console.log(updatedUser);
-  // return res.json(user);
 });
 
 router.post("/login", (req, res, next) => {
