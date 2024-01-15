@@ -95,11 +95,14 @@ onMounted(async () => {
   const username = route.params.username;
   await axios.get(`/users/${username}`).then((res) => {
     user.value = res.data;
-    console.log(res.data);
   });
   await axios.get(`/posts/byUser/${user.value._id}`).then((res) => {
-    posts.value = res.data.filter((el) => el.type === "post");
-    replies.value = res.data.filter((el) => el.type === "comment");
+    posts.value = res.data?.filter(
+      (el) => el.type === "post" && el.disabled === false
+    );
+    replies.value = res.data?.filter(
+      (el) => el.type === "comment" && el.disabled === false
+    );
   });
   followed.value = follows.value?.includes(user.value._id);
 });

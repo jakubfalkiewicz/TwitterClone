@@ -1,5 +1,5 @@
 <template>
-  <div class="posts">
+  <div v-if="!post?.disabled" class="posts">
     <Post
       v-if="post !== null"
       :showInitial="true"
@@ -7,21 +7,17 @@
       :commentSection="true"
     ></Post>
   </div>
+  <div v-else>There is no content available under this URL</div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "../api/axios";
 import { useRoute } from "vue-router";
-import useAuthStore from "../stores/AuthStore";
 import Post from "../components/Post.vue";
 
-const { follows, login } = useAuthStore();
-
-const user = ref(null);
 const post = ref(null);
 const route = useRoute();
-const followed = ref(null);
 
 onMounted(async () => {
   const postId = route.params.postId;
@@ -29,7 +25,6 @@ onMounted(async () => {
     post.value = res.data;
     console.log(post.value);
   });
-  //   followed.value = follows?.includes(user.value._id);
 });
 </script>
 

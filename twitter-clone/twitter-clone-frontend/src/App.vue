@@ -12,7 +12,6 @@ const { authRequestSent, isAuthenticated } = storeToRefs(auth);
 
 onMounted(async () => {
   await auth.authenticate();
-  console.log("AUTHENTICATE");
   if (authRequestSent.value && !isAuthenticated.value) {
     router.push("/login");
   }

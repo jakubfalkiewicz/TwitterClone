@@ -1,5 +1,15 @@
 <template>
-  <div class="post-component">
+  <div v-if="post.disabled" class="disabled-post">
+    <div class="disabled-layout">
+      <Post
+        v-if="post.initialPost && showInitial && post.type !== 'post'"
+        :showInitial="true"
+        :post="post.initialPost"
+      ></Post>
+      <div class="disabled-info">This Post has been deleted by its author</div>
+    </div>
+  </div>
+  <div v-else class="post-component">
     <Post
       v-if="post.initialPost && showInitial && post.type !== 'post'"
       :showInitial="true"
@@ -59,12 +69,19 @@
             <i class="bi bi-bar-chart"></i> {{ post.views }}
           </div>
         </div>
+        <div v-if="user?.login === post.author.login" class="post-modify">
+          <button>EDIT</button>
+          <button @click="handleDelete(post._id)">DELETE</button>
+        </div>
       </div>
       <div class="reply-row" v-if="commentSection === true">
         <input v-model="replyText" placeholder="Reply" />
         <button type="submit" @click="submitReply">SUBMIT REPLY</button>
       </div>
-      <div v-if="commentSection === true" v-for="comment in post.comments">
+      <div
+        v-if="commentSection === true"
+        v-for="comment in post.comments.filter((comment) => !comment.disabled)"
+      >
         <Post :post="comment"></Post>
         <div class="separator"></div>
       </div>
@@ -114,7 +131,14 @@ const submitReply = async () => {
   props.post.comments.push(reply.data);
 };
 
-function hasClassInAncestors(element, className) {
+const handleDelete = async (id) => {
+  if (window.confirm("Do you really want to delete this post?")) {
+    await axios.delete(`/posts/${id}`);
+    router.push("/");
+  }
+};
+
+const hasClassInAncestors = (element, className) => {
   if (!element || !element.classList) {
     return false;
   }
@@ -122,12 +146,13 @@ function hasClassInAncestors(element, className) {
     return true;
   }
   return hasClassInAncestors(element.parentElement, className);
-}
+};
 
 const elementClick = (el, postId) => {
   if (
     hasClassInAncestors(el, "post-metadata") ||
-    hasClassInAncestors(el, "post-wrapper")
+    hasClassInAncestors(el, "post-wrapper") ||
+    hasClassInAncestors(el, "post-modify")
   ) {
     return;
   }
@@ -138,6 +163,18 @@ const elementClick = (el, postId) => {
 </script>
 
 <style lang="scss" scoped>
+.disabled-post {
+  width: 100%;
+  .disabled-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    .disabled-info {
+      background: black;
+      padding-block: 1rem;
+    }
+  }
+}
 .post-component {
   display: flex;
   flex-direction: column;
@@ -164,6 +201,10 @@ const elementClick = (el, postId) => {
       gap: 0.5rem;
       .post-wrapper {
         border: 1px solid white;
+      }
+      .post-modify {
+        display: flex;
+        justify-content: space-evenly;
       }
       .post-headline {
         display: flex;
@@ -207,21 +248,4 @@ const elementClick = (el, postId) => {
     }
   }
 }
-
-// @media  (max-width: 768px) {
-//   .post-component {
-//     display: flex;
-//     flex-direction: column;
-//     align-items: center;
-//     gap: 2rem;
-//     width: 100%;
-//     .post-container {
-//       display: flex;
-//       flex-direction: column;
-//       background-color: rebeccapurple;
-//       width: 100%;
-//       max-width: 800px;
-//     }
-//   }
-// }
 </style>

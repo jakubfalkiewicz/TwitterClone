@@ -1,3 +1,3 @@
 <template>
-  <div>Not Found</div>
+  <div>There is no content available under this URL</div>
 </template>

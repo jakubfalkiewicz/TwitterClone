@@ -7,7 +7,7 @@
         placeholder="Write your reply..."
         @input="autoResize($event.target)"
       ></textarea>
-      <div v-if="initialPost" class="post-wrapper">
+      <div v-if="postType === 'post'" class="post-wrapper">
         <Post :post="initialPost" :show-metadata="false"></Post>
       </div>
       <button @click="handleSubmit(postType, initialPost)" type="submit">

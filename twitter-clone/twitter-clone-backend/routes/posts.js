@@ -99,7 +99,7 @@ router.post("/", requireAuth, async (req, res) => {
       initialPost.comments = [...initialPost.comments, dbPost._id];
       await initialPost.save();
     }
-    if (post.type === "post") {
+    if (post.type === "post" && dbPost.initialPost) {
       const initialPost = await Post.findById(dbPost.initialPost);
       initialPost.reposts = [...initialPost.reposts, dbPost._id];
       await initialPost.save();
@@ -113,11 +113,25 @@ router.post("/", requireAuth, async (req, res) => {
   }
 });
 
-router.delete("/:postId", async (req, res) => {
+router.delete("/:postId", requireAuth, async (req, res) => {
   try {
-    const dbPost = await Post.findById(req.params.postId);
-    dbPost.delete();
-    res.send("Post deleted successfully");
+    const postId = req.params.postId;
+    const dbPost = await Post.findById(postId);
+
+    if (dbPost.author.login === req.login) {
+      await Post.updateMany(
+        { comments: postId },
+        { $pull: { comments: postId } }
+      );
+
+      await Post.findByIdAndUpdate(postId, {
+        disabled: true,
+      });
+
+      res.send("Post deleted successfully");
+    } else {
+      res.send("Unauthorized action");
+    }
   } catch (err) {
     res.send(err.message);
   }

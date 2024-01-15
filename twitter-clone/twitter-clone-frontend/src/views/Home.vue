@@ -1,7 +1,11 @@
 <template>
   <div>Feed:</div>
   <div v-if="Array.isArray(posts)" class="posts-container">
-    <Post v-for="post in posts" :key="post._id" :post="post"></Post>
+    <Post
+      v-for="post in posts.filter((el) => !el.disabled)"
+      :key="post._id"
+      :post="post"
+    ></Post>
   </div>
 </template>
 
@@ -14,9 +18,7 @@ const posts = ref(null);
 
 onMounted(async () => {
   const test = await axios.get(`/posts/feed`);
-  console.log(test.data);
   posts.value = test.data;
-  console.log(posts.value);
 });
 </script>
 
@@ -27,5 +29,8 @@ onMounted(async () => {
   gap: 1rem;
   width: 60%;
   align-items: center;
+  @media (max-width: 768px) {
+    width: 90%;
+  }
 }
 </style>

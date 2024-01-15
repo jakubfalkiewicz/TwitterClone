@@ -41,9 +41,11 @@ const navigateToAccount = () => {
 };
 
 const logOut = async () => {
-  await axios.post("/users/logout");
-  auth.logOut();
-  router.push({ path: "/login" });
+  if (window.confirm("Are you sure you want to log out?")) {
+    await axios.post("/users/logout");
+    auth.logOut();
+    router.push({ path: "/login" });
+  }
 };
 </script>
 <style lang="scss" scoped>

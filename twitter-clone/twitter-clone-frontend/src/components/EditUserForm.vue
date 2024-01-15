@@ -14,12 +14,16 @@
 <script setup>
 import axios from "../api/axios";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import useAuthStore from "../stores/AuthStore";
 defineProps(["propLogin"]);
 
 let login = "";
 let password = "";
 const file = ref(null);
 const formData = new FormData();
+const router = useRouter();
+const auth = useAuthStore();
 
 const handleFileUpload = (event) => {
   console.log(event.target.files);
@@ -35,14 +39,19 @@ const updateUserAvatar = async () => {
     formData.append("password", password);
   }
   try {
-    const response = await axios.put("/users/", formData, {
+    await axios.put("/users/", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log(response);
+    if (login) {
+      await axios.post("/users/logout");
+      auth.logOut();
+      router.push("/login");
+    }
   } catch (error) {
-    alert(error.response.data);
+    console.log(error.response);
+    alert(error.response);
   }
 };
 </script>
