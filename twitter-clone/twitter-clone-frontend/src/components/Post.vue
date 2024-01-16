@@ -9,7 +9,7 @@
       <div class="disabled-info">This Post has been deleted by its author</div>
     </div>
   </div>
-  <div v-else class="post-component">
+  <div v-else class="post-component" :key="post._id">
     <Post
       v-if="post.initialPost && showInitial && post.type !== 'post'"
       :showInitial="true"
@@ -49,6 +49,7 @@
           <div
             class="post-metadata"
             @click="
+              httpRequest = 'POST';
               repostType = 'comment';
               showRepostForm = !showRepostForm;
             "
@@ -59,6 +60,7 @@
           <div
             class="post-metadata"
             @click="
+              httpRequest = 'POST';
               repostType = 'post';
               showRepostForm = !showRepostForm;
             "
@@ -69,13 +71,24 @@
             <i class="bi bi-bar-chart"></i> {{ post.views }}
           </div>
         </div>
-        <div v-if="user?.login === post.author.login" class="post-modify">
-          <button>EDIT</button>
+        <div
+          v-if="user?.login === post.author.login && showMetadata"
+          class="post-modify"
+        >
+          <button
+            @click="
+              httpRequest = 'PUT';
+              repostType = post.type;
+              showRepostForm = !showRepostForm;
+            "
+          >
+            EDIT
+          </button>
           <button @click="handleDelete(post._id)">DELETE</button>
         </div>
       </div>
       <div class="reply-row" v-if="commentSection === true">
-        <input v-model="replyText" placeholder="Reply" />
+        <input name="replyText" v-model="replyText" placeholder="Reply" />
         <button type="submit" @click="submitReply">SUBMIT REPLY</button>
       </div>
       <div
@@ -92,6 +105,7 @@
     v-on:closeForm="showRepostForm = !showRepostForm"
     :initial-post="post"
     :post-type="repostType"
+    :httpRequest="httpRequest"
   ></AddPost>
 </template>
 <script setup>
@@ -114,6 +128,7 @@ const user = ref(null);
 const replyText = ref("");
 const showRepostForm = ref(false);
 const repostType = ref("");
+const httpRequest = ref(null);
 
 onMounted(async () => {
   await axios.get(`/users/${login}`).then((res) => {
@@ -133,8 +148,13 @@ const submitReply = async () => {
 
 const handleDelete = async (id) => {
   if (window.confirm("Do you really want to delete this post?")) {
-    await axios.delete(`/posts/${id}`);
-    router.push("/");
+    const post = await axios.delete(`/posts/${id}`);
+    if (route.params.postId === id) {
+      router.push("/");
+    }
+    if (post.data.post) {
+      props.post.disabled = true;
+    }
   }
 };
 

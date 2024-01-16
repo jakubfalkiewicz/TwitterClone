@@ -4,13 +4,15 @@
     <div class="form">
       <i @click="handleClose" class="bi bi-x"></i>
       <textarea
+        id="textarea"
         placeholder="Write your reply..."
+        :value="httpRequest === 'PUT' ? initialPost.text : postText"
         @input="autoResize($event.target)"
       ></textarea>
       <div v-if="postType === 'post'" class="post-wrapper">
         <Post :post="initialPost" :show-metadata="false"></Post>
       </div>
-      <button @click="handleSubmit(postType, initialPost)" type="submit">
+      <button @click="handleSubmit" type="submit">
         {{ initialPost ? "Post" : "Reply" }}
       </button>
     </div>
@@ -21,7 +23,7 @@
 import { ref } from "vue";
 import Post from "./Post.vue";
 import axios from "../api/axios";
-defineProps(["postType", "user", "initialPost"]);
+const props = defineProps(["postType", "user", "initialPost", "httpRequest"]);
 const emits = defineEmits(["closeForm"]);
 
 const showForm = ref(true);
@@ -32,13 +34,19 @@ const handleClose = () => {
   emits("closeForm");
 };
 
-const handleSubmit = async (type, initial) => {
-  await axios.post("/posts/", {
-    text: postText.value,
-    photo: null,
-    type: type,
-    initialPost: initial,
-  });
+const handleSubmit = async () => {
+  if (props.httpRequest === "POST") {
+    await axios.post("/posts/", {
+      text: postText.value,
+      photo: null,
+      type: props.postType,
+      initialPost: props.initialPost,
+    });
+  } else if (props.httpRequest === "PUT") {
+    await axios.put(`/posts/${initialPost._id}`, {
+      text: props.initialPost.text,
+    });
+  }
   handleClose();
 };
 

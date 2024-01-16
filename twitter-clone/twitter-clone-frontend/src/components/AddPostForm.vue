@@ -23,14 +23,12 @@ const closeModal = () => {
 };
 
 const submitPost = async (postType, initialPost) => {
-  console.log(postType);
   const response = await axios.post("/posts/", {
     text: content.value,
     photo: null,
     type: postType,
     initialPost: initialPost,
   });
-  console.log(response.data);
   emits("submitPost", { ...response.data });
   content.value = "";
   closeModal();

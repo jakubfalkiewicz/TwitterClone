@@ -3,7 +3,11 @@
     <div>Register</div>
     <input v-model="login" placeholder="Login" />
     <input v-model="password" placeholder="Password" type="password" />
-    <input v-on:change="handleFileUpload($event)" type="file" />
+    <input
+      id="avatar-input"
+      v-on:change="handleFileUpload($event)"
+      type="file"
+    />
     <button @click="apiRegister">Register</button>
   </div>
 </template>
@@ -18,9 +22,13 @@ const file = ref(null);
 const formData = new FormData();
 
 const handleFileUpload = (event) => {
-  console.log(event.target.files);
-  file.value = event.target.files[0];
-  formData.append("file", file.value);
+  if (event.target.files[0].size > 1024 * 1024) {
+    document.getElementById("avatar-input").value = null;
+    alert("The file is too big. Please insert a file with maximum size of 1MB");
+  } else {
+    file.value = event.target.files[0];
+    formData.append("file", file.value);
+  }
 };
 
 const apiRegister = async () => {

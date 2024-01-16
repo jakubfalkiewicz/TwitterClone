@@ -68,6 +68,24 @@ router.get("/:postId", requireAuth, async (req, res) => {
   }
 });
 
+router.put("/:postId", async (req, res) => {
+  const postId = req.params.postId;
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found", code: 404 });
+    }
+    res.json(post);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({
+      post: "Failed to get the posts",
+      code: 500,
+    });
+  }
+});
+
 router.get("/byUser/:userId", requireAuth, async (req, res) => {
   const userId = req.params.userId;
   try {
@@ -123,12 +141,16 @@ router.delete("/:postId", requireAuth, async (req, res) => {
         { comments: postId },
         { $pull: { comments: postId } }
       );
+      if (dbPost.comments.length + dbPost.reposts.length === 0) {
+        dbPost.remove();
+        return res.send({ post: null });
+      }
 
-      await Post.findByIdAndUpdate(postId, {
+      const disabledPost = await Post.findByIdAndUpdate(postId, {
         disabled: true,
       });
 
-      res.send("Post deleted successfully");
+      return res.send({ post: disabledPost });
     } else {
       res.send("Unauthorized action");
     }
@@ -136,5 +158,16 @@ router.delete("/:postId", requireAuth, async (req, res) => {
     res.send(err.message);
   }
 });
+
+// router.delete("/", requireAuth, async (req, res) => {
+//   try {
+//     const posts = (await Post.find()).forEach((post) => post.remove());
+
+//     res.send("success");
+//     // res.send(posts.filter((post) => post.initialPost?.disabled));
+//   } catch (err) {
+//     res.send(err.message);
+//   }
+// });
 
 module.exports = router;

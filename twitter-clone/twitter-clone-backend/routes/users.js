@@ -5,6 +5,8 @@ const passport = require("../auth/passportConfig");
 const requireAuth = require("../auth/authMiddleware");
 const upload = require("../multerMiddleware/uploadAvatar");
 const bcrypt = require("bcrypt");
+const fs = require("fs");
+const path = require("path");
 
 router.get("/", async (req, res) => {
   try {
@@ -42,6 +44,16 @@ router.post("/register", upload.single("file"), async (req, res) => {
 router.put("/", requireAuth, upload.single("file"), async (req, res) => {
   try {
     const user = await User.findOne({ login: req.login });
+    if (req.file && user.avatar) {
+      const filePath = path.join(__dirname, "..", "uploads", user.avatar);
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error(`Error deleting file: ${err}`);
+        } else {
+          console.log("File deleted successfully");
+        }
+      });
+    }
     let hashedPassword;
     if (req.body?.password && !Array.isArray(req.body?.password)) {
       const salt = await bcrypt.genSalt(10);
@@ -52,10 +64,10 @@ router.put("/", requireAuth, upload.single("file"), async (req, res) => {
       {
         login: req.body?.login ? req.body.login : user.login,
         password: hashedPassword || user.password,
+        avatar: req.file?.filename || user.avatar,
       }
     )
-      .then((response) => {
-        console.log("SUCCESS");
+      .then(() => {
         return res.status(200).send("Success");
       })
       .catch((err) => {

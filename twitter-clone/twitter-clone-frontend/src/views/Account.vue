@@ -26,6 +26,7 @@
     <EditUserForm
       v-if="user?.login && showUserUpdate"
       :propLogin="user.login"
+      v-on:close-form="showUserUpdate = !showUserUpdate"
     ></EditUserForm>
     <div class="post-type-select">
       <button
