@@ -3,6 +3,9 @@ const router = express.Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
 const requireAuth = require("../auth/authMiddleware");
+const upload = require("../multerMiddleware/uploadAvatar");
+const fs = require("fs");
+const path = require("path");
 
 const getCurrentDate = () => {
   var dateTime = new Date();
@@ -101,34 +104,37 @@ router.get("/byUser/:userId", requireAuth, async (req, res) => {
   }
 });
 
-router.post("/", requireAuth, async (req, res) => {
+router.post("/", upload.single("file"), requireAuth, async (req, res) => {
   const post = {
     ...req.body,
     author: req.userId,
     date: getCurrentDate(),
     comments: [],
     reposts: [],
+    photo: req.file?.filename,
     views: 0,
   };
-  try {
-    const dbPost = await Post.create(post);
-    if (post.type === "comment") {
-      const initialPost = await Post.findById(dbPost.initialPost);
-      initialPost.comments = [...initialPost.comments, dbPost._id];
-      await initialPost.save();
-    }
-    if (post.type === "post" && dbPost.initialPost) {
-      const initialPost = await Post.findById(dbPost.initialPost);
-      initialPost.reposts = [...initialPost.reposts, dbPost._id];
-      await initialPost.save();
-    }
-    const populatedPost = await Post.findById(dbPost._id);
-    res.send(populatedPost);
-  } catch (error) {
-    console.log(error.message);
-    res.status(400);
-    res.end(error.message);
-  }
+  console.log(post);
+  res.status(200).send(post);
+  // try {
+  //   const dbPost = await Post.create(post);
+  //   if (post.type === "comment") {
+  //     const initialPost = await Post.findById(dbPost.initialPost);
+  //     initialPost.comments = [...initialPost.comments, dbPost._id];
+  //     await initialPost.save();
+  //   }
+  //   if (post.type === "post" && dbPost.initialPost) {
+  //     const initialPost = await Post.findById(dbPost.initialPost);
+  //     initialPost.reposts = [...initialPost.reposts, dbPost._id];
+  //     await initialPost.save();
+  //   }
+  //   const populatedPost = await Post.findById(dbPost._id);
+  //   res.send(populatedPost);
+  // } catch (error) {
+  //   console.log(error.message);
+  //   res.status(400);
+  //   res.end(error.message);
+  // }
 });
 
 router.delete("/:postId", requireAuth, async (req, res) => {
@@ -142,6 +148,14 @@ router.delete("/:postId", requireAuth, async (req, res) => {
         { $pull: { comments: postId } }
       );
       if (dbPost.comments.length + dbPost.reposts.length === 0) {
+        // const filePath = path.join(__dirname, "..", "uploads", user.avatar);
+        // fs.unlink(filePath, (err) => {
+        //   if (err) {
+        //     console.error(`Error deleting file: ${err}`);
+        //   } else {
+        //     console.log("File deleted successfully");
+        //   }
+        // });
         dbPost.remove();
         return res.send({ post: null });
       }

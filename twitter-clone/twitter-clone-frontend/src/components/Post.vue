@@ -50,7 +50,7 @@
             class="post-metadata"
             @click="
               httpRequest = 'POST';
-              repostType = 'comment';
+              postType = 'comment';
               showRepostForm = !showRepostForm;
             "
           >
@@ -61,7 +61,7 @@
             class="post-metadata"
             @click="
               httpRequest = 'POST';
-              repostType = 'post';
+              postType = 'post';
               showRepostForm = !showRepostForm;
             "
           >
@@ -78,7 +78,7 @@
           <button
             @click="
               httpRequest = 'PUT';
-              repostType = post.type;
+              postType = post.type;
               showRepostForm = !showRepostForm;
             "
           >
@@ -104,7 +104,7 @@
     v-if="showRepostForm"
     v-on:closeForm="showRepostForm = !showRepostForm"
     :initial-post="post"
-    :post-type="repostType"
+    :post-type="postType"
     :httpRequest="httpRequest"
   ></AddPost>
 </template>
@@ -127,7 +127,7 @@ const { login } = useAuthStore();
 const user = ref(null);
 const replyText = ref("");
 const showRepostForm = ref(false);
-const repostType = ref("");
+const postType = ref("");
 const httpRequest = ref(null);
 
 onMounted(async () => {
@@ -148,13 +148,11 @@ const submitReply = async () => {
 
 const handleDelete = async (id) => {
   if (window.confirm("Do you really want to delete this post?")) {
-    const post = await axios.delete(`/posts/${id}`);
+    await axios.delete(`/posts/${id}`);
     if (route.params.postId === id) {
       router.push("/");
     }
-    if (post.data.post) {
-      props.post.disabled = true;
-    }
+    props.post.disabled = true;
   }
 };
 
@@ -184,6 +182,7 @@ const elementClick = (el, postId) => {
 
 <style lang="scss" scoped>
 .disabled-post {
+  max-width: 800px;
   width: 100%;
   .disabled-layout {
     display: flex;

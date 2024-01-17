@@ -43,7 +43,7 @@
       </button>
       <button
         v-if="user != null && user.login === login"
-        @click="showForm = !showForm"
+        @click="showNewPostForm = !showNewPostForm"
       >
         New post
       </button>
@@ -61,24 +61,24 @@
     ></Post>
     <!-- </div> -->
   </div>
-  <AddPostForm
-    v-if="showForm"
-    v-on:close="showForm = !showForm"
-    v-on:submitPost="addPost"
-    :userAvatar="user.avatarUrl"
-    :postType="'post'"
-    :initialPost="null"
-  ></AddPostForm>
+  <AddPost
+    v-if="showNewPostForm"
+    v-on:closeForm="showNewPostForm = !showNewPostForm"
+    :initial-post="null"
+    :post-type="'post'"
+    :httpRequest="'POST'"
+  >
+  </AddPost>
 </template>
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "../api/axios";
 import { useRoute } from "vue-router";
-import AddPostForm from "../components/AddPostForm.vue";
 import Post from "../components/Post.vue";
 import useAuthStore from "../stores/AuthStore";
 import { storeToRefs } from "pinia";
 import EditUserForm from "../components/EditUserForm.vue";
+import AddPost from "../components/AddPost.vue";
 
 const auth = useAuthStore();
 const { login, follows } = storeToRefs(auth);
@@ -87,10 +87,10 @@ const user = ref(null);
 const posts = ref(null);
 const replies = ref(null);
 const route = useRoute();
-const showForm = ref(false);
 const followed = ref(null);
 const showPostType = ref("post");
 const showUserUpdate = ref(false);
+const showNewPostForm = ref(false);
 
 onMounted(async () => {
   const username = route.params.username;

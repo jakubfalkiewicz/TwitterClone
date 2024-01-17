@@ -39,6 +39,14 @@ var autoPopulateFields = function (next) {
   next();
 };
 
+postSchema.virtual("imageUrl").get(function () {
+  let photo = this.photo ? this.photo : "avatar.png";
+  return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${photo}`;
+});
+
 postSchema.pre("find", autoPopulateFields).pre("findOne", autoPopulateFields);
+
+postSchema.set("toJSON", { virtuals: true });
+postSchema.set("toObject", { virtuals: true });
 
 module.exports = model("Post", postSchema);

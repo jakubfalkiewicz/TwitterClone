@@ -45,6 +45,7 @@ router.put("/", requireAuth, upload.single("file"), async (req, res) => {
   try {
     const user = await User.findOne({ login: req.login });
     if (req.file && user.avatar) {
+      console.log("CHANGE PHOTO");
       const filePath = path.join(__dirname, "..", "uploads", user.avatar);
       fs.unlink(filePath, (err) => {
         if (err) {
@@ -55,9 +56,15 @@ router.put("/", requireAuth, upload.single("file"), async (req, res) => {
       });
     }
     let hashedPassword;
-    if (req.body?.password && !Array.isArray(req.body?.password)) {
+    if (req.body?.password) {
       const salt = await bcrypt.genSalt(10);
       hashedPassword = await bcrypt.hash(req.body.password, salt);
+    }
+    const userDb = await User.findOne({ login: req.body?.login });
+    console.log(userDb);
+    console.log(req.body?.login);
+    if (userDb) {
+      return res.status(409).send("The username is already taken");
     }
     await User.findOneAndUpdate(
       { login: req.login },
@@ -66,16 +73,8 @@ router.put("/", requireAuth, upload.single("file"), async (req, res) => {
         password: hashedPassword || user.password,
         avatar: req.file?.filename || user.avatar,
       }
-    )
-      .then(() => {
-        return res.status(200).send("Success");
-      })
-      .catch((err) => {
-        console.log("ERROR: " + err.message);
-        if (err.code === 11000 && err.codeName === "DuplicateKey") {
-          return res.status(500).send("The username is already taken");
-        }
-      });
+    );
+    return res.status(200).send("Success");
   } catch (err) {
     console.log(err);
     res.status(500).send(err.message);

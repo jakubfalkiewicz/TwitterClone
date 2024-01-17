@@ -14,7 +14,6 @@ const userSchema = new Schema({
   blocked: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
-// Virtual property to generate avatarUrl
 userSchema.virtual("avatarUrl").get(function () {
   let avatar = this.avatar ? this.avatar : "avatar.png";
   return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${avatar}`;
@@ -35,7 +34,6 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Exclude virtuals when converting to JSON
 userSchema.set("toJSON", { virtuals: true });
 userSchema.set("toObject", { virtuals: true });
 
