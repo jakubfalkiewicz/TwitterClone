@@ -45,7 +45,6 @@ router.put("/", requireAuth, upload.single("file"), async (req, res) => {
   try {
     const user = await User.findOne({ login: req.login });
     if (req.file && user.avatar) {
-      console.log("CHANGE PHOTO");
       const filePath = path.join(__dirname, "..", "uploads", user.avatar);
       fs.unlink(filePath, (err) => {
         if (err) {
@@ -61,8 +60,6 @@ router.put("/", requireAuth, upload.single("file"), async (req, res) => {
       hashedPassword = await bcrypt.hash(req.body.password, salt);
     }
     const userDb = await User.findOne({ login: req.body?.login });
-    console.log(userDb);
-    console.log(req.body?.login);
     if (userDb) {
       return res.status(409).send("The username is already taken");
     }

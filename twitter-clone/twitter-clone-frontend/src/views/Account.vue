@@ -64,6 +64,7 @@
   <AddPost
     v-if="showNewPostForm"
     v-on:closeForm="showNewPostForm = !showNewPostForm"
+    v-on:addPost="addPost"
     :initial-post="null"
     :post-type="'post'"
     :httpRequest="'POST'"
@@ -96,6 +97,7 @@ onMounted(async () => {
   const username = route.params.username;
   await axios.get(`/users/${username}`).then((res) => {
     user.value = res.data;
+    console.log(res.data);
   });
   await axios.get(`/posts/byUser/${user.value._id}`).then((res) => {
     posts.value = res.data?.filter(
@@ -109,7 +111,9 @@ onMounted(async () => {
 });
 
 const addPost = (post) => {
-  posts.value.push(post);
+  console.log(posts.value);
+  posts.value = [...posts.value, post];
+  console.log(posts.value);
 };
 
 const followUser = async (e) => {

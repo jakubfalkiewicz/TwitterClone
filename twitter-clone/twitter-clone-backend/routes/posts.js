@@ -114,48 +114,47 @@ router.post("/", upload.single("file"), requireAuth, async (req, res) => {
     photo: req.file?.filename,
     views: 0,
   };
-  console.log(post);
-  res.status(200).send(post);
-  // try {
-  //   const dbPost = await Post.create(post);
-  //   if (post.type === "comment") {
-  //     const initialPost = await Post.findById(dbPost.initialPost);
-  //     initialPost.comments = [...initialPost.comments, dbPost._id];
-  //     await initialPost.save();
-  //   }
-  //   if (post.type === "post" && dbPost.initialPost) {
-  //     const initialPost = await Post.findById(dbPost.initialPost);
-  //     initialPost.reposts = [...initialPost.reposts, dbPost._id];
-  //     await initialPost.save();
-  //   }
-  //   const populatedPost = await Post.findById(dbPost._id);
-  //   res.send(populatedPost);
-  // } catch (error) {
-  //   console.log(error.message);
-  //   res.status(400);
-  //   res.end(error.message);
-  // }
+  try {
+    const dbPost = await Post.create(post);
+    if (post.type === "comment") {
+      const initialPost = await Post.findById(dbPost.initialPost);
+      initialPost.comments = [...initialPost.comments, dbPost._id];
+      await initialPost.save();
+    }
+    if (post.type === "post" && dbPost?.initialPost) {
+      const initialPost = await Post.findById(dbPost.initialPost);
+      initialPost.reposts = [...initialPost.reposts, dbPost._id];
+      await initialPost.save();
+    }
+    const populatedPost = await Post.findById(dbPost._id);
+    res.send(populatedPost);
+  } catch (error) {
+    console.log(error.message);
+    res.status(400);
+    res.end(error.message);
+  }
 });
 
 router.delete("/:postId", requireAuth, async (req, res) => {
   try {
     const postId = req.params.postId;
     const dbPost = await Post.findById(postId);
-
     if (dbPost.author.login === req.login) {
       await Post.updateMany(
         { comments: postId },
         { $pull: { comments: postId } }
       );
       if (dbPost.comments.length + dbPost.reposts.length === 0) {
-        // const filePath = path.join(__dirname, "..", "uploads", user.avatar);
-        // fs.unlink(filePath, (err) => {
-        //   if (err) {
-        //     console.error(`Error deleting file: ${err}`);
-        //   } else {
-        //     console.log("File deleted successfully");
-        //   }
-        // });
+        if (dbPost.photo) {
+          const filePath = path.join(__dirname, "..", "uploads", dbPost.photo);
+          fs.unlink(filePath, (err) => {
+            if (err) {
+              console.error(`Error deleting file: ${err}`);
+            } else {
+              console.log("File deleted successfully");
+            }
+          });
+        }
         dbPost.remove();
         return res.send({ post: null });
       }

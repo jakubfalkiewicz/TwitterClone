@@ -15,7 +15,7 @@
       <img id="output" />
       <div class="post-form-file">
         <div>
-          <i @click="removeFile" class="bi bi-trash3"></i>
+          <i @click="removeFile" v-if="file !== null" class="bi bi-trash3"></i>
           <input
             id="file-input"
             type="file"
@@ -36,7 +36,7 @@ import { ref } from "vue";
 import Post from "./Post.vue";
 import axios from "../api/axios";
 const props = defineProps(["postType", "user", "initialPost", "httpRequest"]);
-const emits = defineEmits(["closeForm"]);
+const emits = defineEmits(["closeForm", "addPost"]);
 
 const showForm = ref(true);
 const postText = ref("");
@@ -50,23 +50,26 @@ const handleClose = () => {
 
 const handleSubmit = async () => {
   if (props.httpRequest === "POST") {
+    let newPost;
     formData.delete("text");
     formData.append("text", postText.value);
     if (!props.initialPost && file.value !== null) {
-      console.log(formData);
-      await axios.post("/posts/", formData, {
+      formData.delete("type");
+      formData.append("type", "post");
+      newPost = await axios.post("/posts/", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
     } else {
-      await axios.post("/posts/", {
+      newPost = await axios.post("/posts/", {
         text: postText.value,
         photo: null,
         type: props.postType,
         initialPost: props.initialPost,
       });
     }
+    emits("addPost", newPost.data);
   } else if (props.httpRequest === "PUT") {
     await axios.put(`/posts/${initialPost._id}`, {
       text: props.initialPost.text,
@@ -102,7 +105,8 @@ const removeFile = () => {
   formData.delete("file");
   console.log(document.getElementById("output"));
   document.getElementById("file-input").value = null;
-  document.getElementById("output").src = null;
+  document.getElementById("output").src = "";
+  file.value = null;
 };
 </script>
 

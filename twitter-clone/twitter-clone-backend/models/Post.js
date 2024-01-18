@@ -11,6 +11,7 @@ const postSchema = new Schema({
   initialPost: {
     type: Schema.Types.ObjectId,
     ref: "Post",
+    default: null,
   },
   photo: { type: String, required: false },
   reposts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
@@ -40,8 +41,10 @@ var autoPopulateFields = function (next) {
 };
 
 postSchema.virtual("imageUrl").get(function () {
-  let photo = this.photo ? this.photo : "avatar.png";
-  return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${photo}`;
+  if (this.photo) {
+    return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${this.photo}`;
+  }
+  return null;
 });
 
 postSchema.pre("find", autoPopulateFields).pre("findOne", autoPopulateFields);

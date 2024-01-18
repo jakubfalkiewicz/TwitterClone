@@ -38,6 +38,12 @@
         <div>
           {{ post.text }}
         </div>
+        <img
+          v-if="post.imageUrl"
+          class="post-image"
+          atl=""
+          :src="post.imageUrl"
+        />
         <div
           class="post-wrapper"
           @click="router.push(`/post/${post.initialPost._id}`)"
