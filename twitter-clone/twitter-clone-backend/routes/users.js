@@ -156,6 +156,23 @@ router.get("/:username", requireAuth, async (req, res) => {
   }
 });
 
+router.get("/search/:username", requireAuth, async (req, res) => {
+  try {
+    const username = req.params.username;
+    const users = await User.find({
+      login: { $regex: `${username}`, $options: "i" },
+    });
+
+    return res.status(200).send(users);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      code: 500,
+    });
+  }
+});
+
 router.delete("/deleteAll", async (req, res) => {
   await User.deleteMany({});
   return res.send("Deleted all");

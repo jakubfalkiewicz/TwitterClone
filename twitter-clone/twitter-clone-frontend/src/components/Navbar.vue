@@ -9,12 +9,21 @@
       </button>
       <button v-if="!isAuthenticated" @click="navigateToLogin">Login</button>
     </div>
-    <div class="navbar-row-2">
-      <i
-        v-if="isAuthenticated"
-        class="bi bi-arrow-return-left"
-        @click="router.go(-1)"
-      ></i>
+    <div class="navbar-row-2" v-if="isAuthenticated">
+      <div>
+        <input
+          placeholder="Find user"
+          @input="findUser($event.target.value)"
+          @click="watchFocus"
+        />
+        <ul class="dropdown-list">
+          <li class="dropdown-element" v-for="user in searchUsers">
+            {{ user.login }}
+          </li>
+        </ul>
+      </div>
+
+      <i class="bi bi-arrow-return-left" @click="router.go(-1)"></i>
     </div>
   </div>
 </template>
@@ -22,10 +31,40 @@
 import axios from "../api/axios";
 import { useRouter } from "vue-router";
 import useAuthStore from "../stores/AuthStore";
+import { ref } from "vue";
+defineProps(["isAuthenticated"]);
 
 const auth = useAuthStore();
 const router = useRouter();
-defineProps(["isAuthenticated"]);
+const searchUsers = ref(null);
+
+const findUser = async (input) => {
+  if (input) {
+    const users = await axios.get(`/users/search/${input}`);
+    searchUsers.value = users.data;
+  } else {
+    searchUsers.value = null;
+  }
+};
+
+let mousedownListener;
+
+const watchFocus = () => {
+  if (mousedownListener) {
+    document.removeEventListener("mousedown", mousedownListener);
+  }
+
+  mousedownListener = (e) => {
+    if (e.target.classList.contains("dropdown-element")) {
+      router.push(`/user/${e.target.textContent}`);
+      searchUsers.value = null;
+    } else {
+      searchUsers.value = null;
+    }
+  };
+
+  document.addEventListener("mousedown", mousedownListener);
+};
 
 const navigateToRegister = () => {
   router.push({ path: "/register" });
@@ -52,6 +91,7 @@ const logOut = async () => {
 #navbar {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
   width: 100%;
   .navbar-row-1 {
     display: flex;
@@ -60,8 +100,28 @@ const logOut = async () => {
   }
   .navbar-row-2 {
     display: flex;
+    gap: 1rem;
     width: 100%;
     justify-content: center;
+    input {
+      font-size: 1rem;
+    }
+    .dropdown-list {
+      position: absolute;
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      .dropdown-element {
+        text-decoration: none;
+        list-style: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        background: gray;
+      }
+    }
   }
   .bi-arrow-return-left {
     font-size: 1.5rem;

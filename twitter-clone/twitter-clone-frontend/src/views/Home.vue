@@ -2,7 +2,7 @@
   <div>Feed:</div>
   <div v-if="Array.isArray(posts)" class="posts-container">
     <Post
-      v-for="post in posts.filter((el) => !el.disabled)"
+      v-for="post in posts.filter((el) => !el.disabled).reverse()"
       :key="post._id"
       :post="post"
     ></Post>

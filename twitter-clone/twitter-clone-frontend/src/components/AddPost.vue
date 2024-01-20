@@ -15,7 +15,7 @@
       >
         <Post :post="initialPost.initialPost" :show-metadata="false"></Post>
       </div>
-      <img id="output" :src="initialPost.imageUrl" />
+      <img id="output" :src="initialPost?.imageUrl" />
       <div class="post-form-file">
         <div>
           <i @click="removeFile" v-if="file !== null" class="bi bi-trash3"></i>
@@ -153,7 +153,6 @@ const removeFile = () => {
       object-fit: contain;
     }
     .post-form-file {
-      margin-top: 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -178,7 +177,6 @@ const removeFile = () => {
   }
 }
 textarea {
-  height: 1.2rem;
   resize: none;
   border: none;
   background: transparent;
