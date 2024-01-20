@@ -57,7 +57,7 @@
             @click="
               httpRequest = 'POST';
               postType = 'comment';
-              showRepostForm = !showRepostForm;
+              showPostForm = !showPostForm;
             "
           >
             <i class="bi bi-chat-left-text"></i>
@@ -68,7 +68,7 @@
             @click="
               httpRequest = 'POST';
               postType = 'post';
-              showRepostForm = !showRepostForm;
+              showPostForm = !showPostForm;
             "
           >
             <i class="bi bi-repeat"></i> {{ post.reposts?.length }}
@@ -85,7 +85,7 @@
             @click="
               httpRequest = 'PUT';
               postType = post.type;
-              showRepostForm = !showRepostForm;
+              showPostForm = !showPostForm;
             "
           >
             EDIT
@@ -107,8 +107,9 @@
     </div>
   </div>
   <AddPost
-    v-if="showRepostForm"
-    v-on:closeForm="showRepostForm = !showRepostForm"
+    v-if="showPostForm"
+    v-on:closeForm="showPostForm = !showPostForm"
+    v-on:editPost="editPost"
     :initial-post="post"
     :post-type="postType"
     :httpRequest="httpRequest"
@@ -132,7 +133,7 @@ const route = useRoute();
 const { login } = useAuthStore();
 const user = ref(null);
 const replyText = ref("");
-const showRepostForm = ref(false);
+const showPostForm = ref(false);
 const postType = ref("");
 const httpRequest = ref(null);
 
@@ -150,6 +151,11 @@ const submitReply = async () => {
     initialPost: route.params.postId,
   });
   props.post.comments.push(reply.data);
+};
+
+const editPost = (post) => {
+  props.post.text = post.text;
+  props.post.imageUrl = post.imageUrl;
 };
 
 const handleDelete = async (id) => {

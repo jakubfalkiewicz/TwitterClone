@@ -9,10 +9,13 @@
         :value="httpRequest === 'PUT' ? initialPost.text : postText"
         @input="autoResize($event.target)"
       ></textarea>
-      <div v-if="initialPost && postType === 'post'" class="post-wrapper">
-        <Post :post="initialPost" :show-metadata="false"></Post>
+      <div
+        v-if="initialPost && initialPost.initialPost && postType === 'post'"
+        class="post-wrapper"
+      >
+        <Post :post="initialPost.initialPost" :show-metadata="false"></Post>
       </div>
-      <img id="output" />
+      <img id="output" :src="initialPost.imageUrl" />
       <div class="post-form-file">
         <div>
           <i @click="removeFile" v-if="file !== null" class="bi bi-trash3"></i>
@@ -36,7 +39,7 @@ import { ref } from "vue";
 import Post from "./Post.vue";
 import axios from "../api/axios";
 const props = defineProps(["postType", "user", "initialPost", "httpRequest"]);
-const emits = defineEmits(["closeForm", "addPost"]);
+const emits = defineEmits(["closeForm", "addPost", "editPost"]);
 
 const showForm = ref(true);
 const postText = ref("");
@@ -49,10 +52,10 @@ const handleClose = () => {
 };
 
 const handleSubmit = async () => {
+  formData.delete("text");
+  formData.append("text", postText.value);
+  let newPost;
   if (props.httpRequest === "POST") {
-    let newPost;
-    formData.delete("text");
-    formData.append("text", postText.value);
     if (!props.initialPost && file.value !== null) {
       formData.delete("type");
       formData.append("type", "post");
@@ -71,9 +74,14 @@ const handleSubmit = async () => {
     }
     emits("addPost", newPost.data);
   } else if (props.httpRequest === "PUT") {
-    await axios.put(`/posts/${initialPost._id}`, {
-      text: props.initialPost.text,
+    formData.delete("type");
+    formData.append("type", "put");
+    newPost = await axios.put(`/posts/${props.initialPost._id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
+    emits("editPost", newPost.data);
   }
   handleClose();
 };

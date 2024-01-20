@@ -71,15 +71,32 @@ router.get("/:postId", requireAuth, async (req, res) => {
   }
 });
 
-router.put("/:postId", async (req, res) => {
+router.put("/:postId", upload.single("file"), requireAuth, async (req, res) => {
   const postId = req.params.postId;
   try {
     const post = await Post.findById(postId);
-
     if (!post) {
       return res.status(404).json({ message: "Post not found", code: 404 });
     }
-    res.json(post);
+    if (req.file && post.photo) {
+      const filePath = path.join(__dirname, "..", "uploads", post.photo);
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error(`Error deleting file: ${err}`);
+        } else {
+          console.log("File deleted successfully");
+        }
+      });
+    }
+    await Post.findOneAndUpdate(
+      { _id: req.params.postId },
+      {
+        text: req.body?.text ? req.body.text : post.text,
+        photo: req.file ? req.file.filename : post.photo,
+      }
+    );
+    const newPost = await Post.findById(postId);
+    return res.status(200).send(newPost);
   } catch (err) {
     console.log(err.message);
     res.status(500).json({
