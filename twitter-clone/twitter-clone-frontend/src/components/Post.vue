@@ -230,6 +230,11 @@ const elementClick = (el, postId) => {
       padding: 1rem;
       text-align: start;
       gap: 0.5rem;
+      .post-image {
+        max-height: 50vh;
+        width: auto;
+        object-fit: contain;
+      }
       .post-wrapper {
         border: 1px solid white;
       }

@@ -128,7 +128,7 @@ const removeFile = () => {
   background-color: rgba(255, 255, 255, 0.315);
 }
 .post-form-container {
-  position: absolute;
+  position: fixed;
   top: 10%;
   width: 60%;
   max-width: 750px;
@@ -147,6 +147,11 @@ const removeFile = () => {
     display: flex;
     flex-direction: column;
     width: 100%;
+    #output {
+      max-height: 50vh;
+      width: auto;
+      object-fit: contain;
+    }
     .post-form-file {
       margin-top: 1rem;
       display: flex;
@@ -157,11 +162,7 @@ const removeFile = () => {
         display: flex;
         gap: 0.5rem;
       }
-      #output {
-        max-height: 50vh;
-        width: auto;
-        object-fit: contain;
-      }
+
       i {
         font-size: 1.25rem;
       }
