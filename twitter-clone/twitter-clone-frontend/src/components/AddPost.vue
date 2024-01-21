@@ -140,6 +140,7 @@ const removeFile = () => {
   background: black;
   padding: 1rem;
   width: 100%;
+  flex-wrap: wrap;
   .post-wrapper {
     border: 1px solid white;
   }

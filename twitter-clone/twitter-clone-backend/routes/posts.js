@@ -7,21 +7,6 @@ const upload = require("../multerMiddleware/uploadAvatar");
 const fs = require("fs");
 const path = require("path");
 
-const getCurrentDate = () => {
-  var dateTime = new Date();
-  return (
-    dateTime.getUTCHours() +
-    ":" +
-    dateTime.getUTCMinutes() +
-    " " +
-    dateTime.getUTCDate() +
-    "/" +
-    (dateTime.getUTCMonth() + 1) +
-    "/" +
-    dateTime.getUTCFullYear()
-  );
-};
-
 router.get("/", async (req, res) => {
   try {
     const posts = await Post.find({});
@@ -38,12 +23,17 @@ router.get("/", async (req, res) => {
 
 router.get("/feed", requireAuth, async (req, res) => {
   const userId = req.userId;
+  const pageNumber = req.query.pageNumber || 1;
+  const pageSize = 5;
   try {
     const user = await User.findById(userId).populate("follows");
     const followerIds = user.follows.map((follower) => follower._id);
-    const posts = await Post.find({ author: { $in: followerIds } });
+    const posts = await Post.find({ author: { $in: followerIds } })
+      .skip((pageNumber - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ date: 1 });
 
-    res.json(posts);
+    res.status(200).send(posts);
   } catch (error) {
     console.error("Error fetching tweets:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -125,7 +115,7 @@ router.post("/", upload.single("file"), requireAuth, async (req, res) => {
   const post = {
     ...req.body,
     author: req.userId,
-    date: getCurrentDate(),
+    date: new Date(),
     comments: [],
     reposts: [],
     photo: req.file?.filename,

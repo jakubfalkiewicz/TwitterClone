@@ -90,7 +90,7 @@ router.post("/login", (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.status(200).json({ login: user.login });
+      res.status(200).json({ login: user.login, follows: user.follows });
     });
   })(req, res, next);
 });
@@ -116,6 +116,7 @@ router.post("/follow", requireAuth, async (req, res) => {
       user.follows = [...user.follows, userToFollow];
       await User.updateOne({ _id: req.userId }, user);
     }
+    res.status(200).send("Success");
   } catch (e) {
     throw new Error(e);
   }
@@ -125,11 +126,11 @@ router.post("/unfollow", requireAuth, async (req, res) => {
   const userToUnfollow = req.body.unfollowedId;
   try {
     const user = await User.findOne({ _id: req.userId });
-    console.log(user);
     if (user.follows.includes(userToUnfollow)) {
       user.follows = user.follows.filter((user) => user._id != userToUnfollow);
       await User.updateOne({ _id: req.userId }, user);
     }
+    res.status(200).send("Success");
   } catch (e) {
     throw new Error(e);
   }

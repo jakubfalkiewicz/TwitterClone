@@ -2,7 +2,7 @@
   <div>Feed:</div>
   <div v-if="Array.isArray(posts)" class="posts-container">
     <Post
-      v-for="post in posts.filter((el) => !el.disabled).reverse()"
+      v-for="post in posts.filter((el) => !el.disabled)"
       :key="post._id"
       :post="post"
     ></Post>
@@ -15,6 +15,7 @@ import { ref, onMounted } from "vue";
 import Post from "../components/Post.vue";
 
 const posts = ref(null);
+console.log(new Date());
 
 onMounted(async () => {
   const test = await axios.get(`/posts/feed`);

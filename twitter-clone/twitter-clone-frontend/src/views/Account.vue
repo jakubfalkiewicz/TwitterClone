@@ -120,12 +120,14 @@ const followUser = async (e) => {
   e.preventDefault();
   followed.value = !followed.value;
   await axios.post("/users/follow", { followedId: user.value._id });
+  auth.followUser(user.value._id);
 };
 
 const unfollowUser = async (e) => {
   e.preventDefault();
   followed.value = !followed.value;
   await axios.post("/users/unfollow", { unfollowedId: user.value._id });
+  auth.unfollowUser(user.value._id);
 };
 </script>
 <style lang="scss" scoped>

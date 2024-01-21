@@ -18,6 +18,12 @@ const useAuthStore = defineStore(
         this.login = null;
         this.follows = null;
       },
+      followUser(user) {
+        this.follows.push(user);
+      },
+      unfollowUser(user) {
+        this.follows = this.follows.filter((follow) => follow !== user);
+      },
 
       async authenticate() {
         try {

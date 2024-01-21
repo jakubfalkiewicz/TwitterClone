@@ -6,7 +6,7 @@ const postSchema = new Schema({
     ref: "User",
   },
   comments: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-  date: { type: String, required: true },
+  date: { type: Date, required: true },
   disabled: { type: Schema.Types.Boolean, required: true, default: false },
   initialPost: {
     type: Schema.Types.ObjectId,
