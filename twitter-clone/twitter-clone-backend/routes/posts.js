@@ -28,12 +28,20 @@ router.get("/feed", requireAuth, async (req, res) => {
   try {
     const user = await User.findById(userId).populate("follows");
     const followerIds = user.follows.map((follower) => follower._id);
-    const posts = await Post.find({ author: { $in: followerIds } })
+    const postsNumber = await Post.find({
+      author: { $in: followerIds },
+      type: "post",
+    });
+    const posts = await Post.find({
+      author: { $in: followerIds },
+      type: "post",
+    })
       .skip((pageNumber - 1) * pageSize)
       .limit(pageSize)
-      .sort({ date: 1 });
-
-    res.status(200).send(posts);
+      .sort({ date: -1 });
+    res
+      .status(200)
+      .send({ posts: posts, pages: Math.ceil(postsNumber.length / pageSize) });
   } catch (error) {
     console.error("Error fetching tweets:", error);
     res.status(500).json({ error: "Internal Server Error" });

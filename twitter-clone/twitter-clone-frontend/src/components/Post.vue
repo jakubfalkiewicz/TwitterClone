@@ -139,22 +139,19 @@ const httpRequest = ref(null);
 
 const dateOptions = {
   year: "numeric",
-  month: "short",
+  month: "numeric",
   day: "numeric",
   hour: "2-digit",
   minute: "2-digit",
-  second: "2-digit",
 };
 
 onMounted(async () => {
   await axios.get(`/users/${login}`).then((res) => {
     user.value = res.data;
   });
-  console.log(new Date(props.post.date));
-  props.post.date = new Intl.DateTimeFormat("en-US", dateOptions).format(
+  props.post.date = new Intl.DateTimeFormat("eu-PL", dateOptions).format(
     new Date(props.post.date)
   );
-  console.log(props.post.date);
 });
 
 const submitReply = async () => {

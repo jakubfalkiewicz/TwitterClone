@@ -5,7 +5,7 @@
       <i @click="handleClose" class="bi bi-x"></i>
       <textarea
         id="textarea"
-        placeholder="Write your reply..."
+        placeholder="Write your thoughts..."
         :value="httpRequest === 'PUT' ? initialPost.text : postText"
         @input="autoResize($event.target)"
       ></textarea>
@@ -15,7 +15,11 @@
       >
         <Post :post="initialPost.initialPost" :show-metadata="false"></Post>
       </div>
-      <img id="output" :src="initialPost?.imageUrl" />
+      <img
+        v-if="postType !== 'comment'"
+        id="output"
+        :src="initialPost?.imageUrl"
+      />
       <div class="post-form-file">
         <div>
           <i @click="removeFile" v-if="file !== null" class="bi bi-trash3"></i>
@@ -27,7 +31,7 @@
           />
         </div>
         <button @click="handleSubmit" type="submit">
-          {{ initialPost ? "Post" : "Reply" }}
+          {{ !initialPost ? "Post" : "Reply" }}
         </button>
       </div>
     </div>
@@ -35,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Post from "./Post.vue";
 import axios from "../api/axios";
 const props = defineProps(["postType", "user", "initialPost", "httpRequest"]);
@@ -46,12 +50,21 @@ const postText = ref("");
 const file = ref(null);
 const formData = new FormData();
 
+onMounted(() => {
+  const textarea = document.querySelector("textarea");
+  autoResize(textarea);
+});
+
 const handleClose = () => {
   showForm.value = !showForm.value;
   emits("closeForm");
 };
 
 const handleSubmit = async () => {
+  if (!postText.value) {
+    alert("Please enter any text to submit the post");
+    return;
+  }
   formData.delete("text");
   formData.append("text", postText.value);
   let newPost;

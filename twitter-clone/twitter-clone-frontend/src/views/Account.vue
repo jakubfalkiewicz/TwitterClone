@@ -136,7 +136,6 @@ const unfollowUser = async (e) => {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
   width: 60%;
   .post-type-select {
     display: flex;
