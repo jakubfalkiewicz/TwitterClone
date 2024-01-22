@@ -6,16 +6,15 @@
       <textarea
         id="textarea"
         placeholder="Write your thoughts..."
-        :value="httpRequest === 'PUT' ? initialPost.text : postText"
+        :value="postText"
         @input="autoResize($event.target)"
       ></textarea>
-      <img
-        v-if="postType !== 'comment'"
-        id="output"
-        :src="initialPost?.initialPost?.imageUrl"
-      />
-      <div v-if="initialPost && postType === 'post'" class="post-wrapper">
-        <Post :post="initialPost" :show-metadata="false"></Post>
+      <img id="output" :src="initialPost?.imageUrl" />
+      <div
+        v-if="initialPost.initialPost && postType === 'post'"
+        class="post-wrapper"
+      >
+        <Post :post="initialPost.initialPost" :show-metadata="false"></Post>
       </div>
       <div class="post-form-file">
         <div>
@@ -50,6 +49,7 @@ const formData = new FormData();
 onMounted(() => {
   const textarea = document.querySelector("textarea");
   autoResize(textarea);
+  postText.value = props.initialPost.text;
 });
 
 const handleClose = () => {
@@ -121,7 +121,6 @@ const loadFile = (event) => {
 
 const removeFile = () => {
   formData.delete("file");
-  console.log(document.getElementById("output"));
   document.getElementById("file-input").value = null;
   document.getElementById("output").src = "";
   file.value = null;

@@ -112,8 +112,8 @@
           ? post.reposts.filter((repost) => !repost.disabled)
           : post.comments.filter((comments) => !comments.disabled)"
       >
-        <Post :post="comment"></Post>
         <div class="separator"></div>
+        <Post :post="comment"></Post>
       </div>
     </div>
   </div>
@@ -170,7 +170,7 @@ onMounted(async () => {
 });
 
 const submitReply = async (formData) => {
-  if (formData) {
+  if (formData.type !== "click") {
     switch (formData.type) {
       case "comment":
         props.post.comments.push(formData);
@@ -178,7 +178,6 @@ const submitReply = async (formData) => {
       case "post":
         props.post.reposts.push(formData);
     }
-    console.log(props.post);
     return;
   }
   const reply = await axios.post(`/posts/`, {
@@ -267,6 +266,9 @@ const elementClick = (el, postId) => {
         gap: 0.25rem;
         input {
           font-size: 1rem;
+          width: 100%;
+          min-width: 150px;
+          max-width: 300px;
         }
       }
       .post-toggle {
