@@ -47,7 +47,7 @@
         <div
           class="post-wrapper"
           @click="router.push(`/post/${post.initialPost._id}`)"
-          v-if="post.type === 'post' && post.initialPost !== null"
+          v-if="post.type === 'post' && post.initialPost"
         >
           <Post :post="post.initialPost" :show-metadata="false"></Post>
         </div>
@@ -93,13 +93,24 @@
           <button @click="handleDelete(post._id)">DELETE</button>
         </div>
       </div>
-      <div class="reply-row" v-if="commentSection === true">
-        <input name="replyText" v-model="replyText" placeholder="Reply" />
-        <button type="submit" @click="submitReply">SUBMIT REPLY</button>
+      <div class="post-action-row" v-if="commentSection === true">
+        <div class="post-toggle">
+          COMMENTS
+          <div class="toggle" @click="toggleActive = !toggleActive">
+            <div class="toggle-switch" :class="{ active: toggleActive }"></div>
+          </div>
+          REPOSTS
+        </div>
+        <div class="post-reply" v-if="!toggleActive">
+          <input name="replyText" v-model="replyText" placeholder="Reply" />
+          <button type="submit" @click="submitReply">REPLY</button>
+        </div>
       </div>
       <div
         v-if="commentSection === true"
-        v-for="comment in post.comments.filter((comment) => !comment.disabled)"
+        v-for="comment in toggleActive
+          ? post.reposts.filter((repost) => !repost.disabled)
+          : post.comments.filter((comments) => !comments.disabled)"
       >
         <Post :post="comment"></Post>
         <div class="separator"></div>
@@ -110,6 +121,7 @@
     v-if="showPostForm"
     v-on:closeForm="showPostForm = !showPostForm"
     v-on:editPost="editPost"
+    v-on:addPost="submitReply"
     :initial-post="post"
     :post-type="postType"
     :httpRequest="httpRequest"
@@ -136,6 +148,7 @@ const replyText = ref("");
 const showPostForm = ref(false);
 const postType = ref("");
 const httpRequest = ref(null);
+const toggleActive = ref(false);
 
 const dateOptions = {
   year: "numeric",
@@ -149,12 +162,25 @@ onMounted(async () => {
   await axios.get(`/users/${login}`).then((res) => {
     user.value = res.data;
   });
-  props.post.date = new Intl.DateTimeFormat("eu-PL", dateOptions).format(
-    new Date(props.post.date)
-  );
+  if (!isNaN(new Date(props.post.date).getTime())) {
+    props.post.date = new Intl.DateTimeFormat("eu-PL", dateOptions).format(
+      new Date(props.post.date)
+    );
+  }
 });
 
-const submitReply = async () => {
+const submitReply = async (formData) => {
+  if (formData) {
+    switch (formData.type) {
+      case "comment":
+        props.post.comments.push(formData);
+        break;
+      case "post":
+        props.post.reposts.push(formData);
+    }
+    console.log(props.post);
+    return;
+  }
   const reply = await axios.post(`/posts/`, {
     text: replyText.value,
     photo: null,
@@ -226,12 +252,47 @@ const elementClick = (el, postId) => {
   .post-container {
     display: flex;
     flex-direction: column;
-    background-color: rebeccapurple;
+    background-color: rgb(0, 0, 0);
     width: 100%;
     max-width: 800px;
     min-width: 300px;
-    .reply-row {
+    .post-action-row {
       padding: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      .post-reply {
+        display: flex;
+        gap: 0.25rem;
+        input {
+          font-size: 1rem;
+        }
+      }
+      .post-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        .toggle {
+          width: 90px;
+          height: 100%;
+          min-height: 43px;
+          background: rgb(73, 73, 73);
+          border-radius: 5rem;
+          padding: 0.25rem;
+          cursor: pointer;
+          .toggle-switch {
+            width: 35px;
+            height: 100%;
+            background: white;
+            border-radius: 5rem;
+            transition: transform 0.3s ease;
+          }
+          .toggle-switch.active {
+            transform: translateX(48px);
+          }
+        }
+      }
     }
     .post {
       display: flex;

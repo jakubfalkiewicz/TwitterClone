@@ -147,7 +147,7 @@ const unfollowUser = async (e) => {
     }
   }
   @media (max-width: 768px) {
-    width: 90%;
+    width: 100%;
   }
 }
 .edit-account {

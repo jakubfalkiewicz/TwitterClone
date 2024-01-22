@@ -10,6 +10,10 @@
       <div
         v-for="index in pages"
         class="page-select"
+        :class="{
+          active:
+            index == $route.query.page || (!$route.query.page && index === 1),
+        }"
         @click="router.push(`/?page=${index}`)"
       >
         {{ index }}
@@ -47,7 +51,7 @@ onMounted(async () => {
   width: 60%;
   align-items: center;
   @media (max-width: 768px) {
-    width: 90%;
+    width: 100%;
   }
 }
 .page-select-container {
@@ -59,6 +63,9 @@ onMounted(async () => {
     text-align: center;
     text-decoration: underline;
     cursor: pointer;
+  }
+  .page-select.active {
+    color: violet;
   }
 }
 </style>

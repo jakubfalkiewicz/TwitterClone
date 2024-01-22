@@ -9,17 +9,14 @@
         :value="httpRequest === 'PUT' ? initialPost.text : postText"
         @input="autoResize($event.target)"
       ></textarea>
-      <div
-        v-if="initialPost && initialPost.initialPost && postType === 'post'"
-        class="post-wrapper"
-      >
-        <Post :post="initialPost.initialPost" :show-metadata="false"></Post>
-      </div>
       <img
         v-if="postType !== 'comment'"
         id="output"
-        :src="initialPost?.imageUrl"
+        :src="initialPost?.initialPost?.imageUrl"
       />
+      <div v-if="initialPost && postType === 'post'" class="post-wrapper">
+        <Post :post="initialPost" :show-metadata="false"></Post>
+      </div>
       <div class="post-form-file">
         <div>
           <i @click="removeFile" v-if="file !== null" class="bi bi-trash3"></i>
@@ -154,6 +151,8 @@ const removeFile = () => {
   padding: 1rem;
   width: 100%;
   flex-wrap: wrap;
+  overflow-y: auto;
+  max-height: 75vh;
   .post-wrapper {
     border: 1px solid white;
   }
@@ -161,6 +160,7 @@ const removeFile = () => {
     display: flex;
     flex-direction: column;
     width: 100%;
+    gap: 0.5rem;
     #output {
       max-height: 50vh;
       width: auto;
@@ -171,11 +171,14 @@ const removeFile = () => {
       justify-content: space-between;
       align-items: center;
       gap: 0.5rem;
+      flex-wrap: wrap;
       > div {
         display: flex;
         gap: 0.5rem;
+        #file-input {
+          max-width: 160px;
+        }
       }
-
       i {
         font-size: 1.25rem;
       }

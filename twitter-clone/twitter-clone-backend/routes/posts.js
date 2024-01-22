@@ -51,10 +51,15 @@ router.get("/feed", requireAuth, async (req, res) => {
 router.get("/:postId", requireAuth, async (req, res) => {
   const postId = req.params.postId;
   try {
-    const post = await Post.findById(postId).populate({
-      path: "comments",
-      select: { initialPost: 0 },
-    });
+    const post = await Post.findById(postId)
+      .populate({
+        path: "comments",
+        select: { initialPost: 0 },
+      })
+      .populate({
+        path: "reposts",
+        select: { initialPost: 0 },
+      });
 
     if (!post) {
       return res.status(404).json({ message: "Post not found", code: 404 });
@@ -107,7 +112,7 @@ router.put("/:postId", upload.single("file"), requireAuth, async (req, res) => {
 router.get("/byUser/:userId", requireAuth, async (req, res) => {
   const userId = req.params.userId;
   try {
-    const posts = await Post.find({ author: userId });
+    const posts = await Post.find({ author: userId }).sort({ date: -1 });
 
     res.json(posts);
   } catch (err) {

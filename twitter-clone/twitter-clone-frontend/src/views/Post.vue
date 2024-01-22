@@ -34,7 +34,7 @@ onMounted(async () => {
   width: 60%;
   justify-content: center;
   @media (max-width: 768px) {
-    width: 90%;
+    width: 100%;
   }
 }
 </style>
