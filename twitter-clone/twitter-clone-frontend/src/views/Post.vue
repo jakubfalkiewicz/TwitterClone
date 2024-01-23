@@ -15,6 +15,10 @@ import { ref, onMounted } from "vue";
 import axios from "../api/axios";
 import { useRoute } from "vue-router";
 import Post from "../components/Post.vue";
+import { socket } from "../socket";
+import useAuthStore from "../stores/AuthStore";
+
+const auth = useAuthStore();
 
 const post = ref(null);
 const route = useRoute();
@@ -23,7 +27,15 @@ onMounted(async () => {
   const postId = route.params.postId;
   await axios.get(`/posts/${postId}`).then((res) => {
     post.value = res.data;
-    console.log(post.value);
+  });
+  socket.on("newPost", (newPost) => {
+    if (
+      newPost.initialPost._id == post.value._id &&
+      newPost.author.login !== auth.login
+    ) {
+      post.value.comments.push(newPost);
+      alert("New comment/repost has been added in this post");
+    }
   });
 });
 </script>

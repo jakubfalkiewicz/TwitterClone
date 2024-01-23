@@ -32,7 +32,6 @@ const messages = require("./routes/messages");
 const posts = require("./routes/posts");
 app.use("/users", users);
 app.use("/messages", messages);
-app.use("/posts", posts);
 app.use(express.static("public"));
 app.use("/uploads", express.static("uploads"));
 
@@ -48,9 +47,9 @@ const server = https.createServer(
 
 const io = new Server(server);
 
-io.on("connection", (socket) => {
-  console.log("Someone conneted");
-});
+var socket = require("./socket.js");
+socket.start(io);
+app.use("/posts", posts(io));
 
 const dbConnData = {
   host: process.env.MONGO_HOST || "127.0.0.1",

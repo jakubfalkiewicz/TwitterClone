@@ -9,7 +9,14 @@
         :value="postText"
         @input="autoResize($event.target)"
       ></textarea>
-      <img id="output" :src="initialPost?.imageUrl" />
+      <img
+        id="output"
+        :src="
+          props.httpRequest === 'PUT' || props.postType === 'post'
+            ? initialPost?.imageUrl
+            : ''
+        "
+      />
       <div
         v-if="initialPost.initialPost && postType === 'post'"
         class="post-wrapper"
@@ -49,7 +56,9 @@ const formData = new FormData();
 onMounted(() => {
   const textarea = document.querySelector("textarea");
   autoResize(textarea);
-  postText.value = props.initialPost.text;
+  if (props.httpRequest === "PUT") {
+    postText.value = props.initialPost.text;
+  }
 });
 
 const handleClose = () => {

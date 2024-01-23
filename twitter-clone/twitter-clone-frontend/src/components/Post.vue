@@ -41,7 +41,7 @@
         <img
           v-if="post.imageUrl"
           class="post-image"
-          atl=""
+          alt=""
           :src="post.imageUrl"
         />
         <div
