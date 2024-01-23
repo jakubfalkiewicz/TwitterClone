@@ -11,17 +11,13 @@
       ></textarea>
       <img
         id="output"
-        :src="
-          props.httpRequest === 'PUT' || props.postType === 'post'
-            ? initialPost?.imageUrl
-            : ''
-        "
+        :src="props.httpRequest === 'PUT' ? initialPost?.imageUrl : ''"
       />
       <div
-        v-if="initialPost.initialPost && postType === 'post'"
+        v-if="initialPost && postType === 'post' && props.httpRequest !== 'PUT'"
         class="post-wrapper"
       >
-        <Post :post="initialPost.initialPost" :show-metadata="false"></Post>
+        <Post :post="initialPost" :show-metadata="false"></Post>
       </div>
       <div class="post-form-file">
         <div>
