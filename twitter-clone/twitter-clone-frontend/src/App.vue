@@ -4,6 +4,7 @@ import { onMounted, watch } from "vue";
 import Navbar from "./components/Navbar.vue";
 import useAuthStore from "./stores/AuthStore";
 import { storeToRefs } from "pinia";
+import { socket } from "./socket";
 
 const router = useRouter();
 const route = useRoute();

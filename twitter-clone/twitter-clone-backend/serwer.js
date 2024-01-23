@@ -6,6 +6,7 @@ const fs = require("fs");
 const https = require("https");
 const path = require("path");
 const cors = require("cors");
+const { Server } = require("socket.io");
 
 app.use(
   cookieSession({
@@ -15,7 +16,6 @@ app.use(
   })
 );
 
-// Initialize passport and the express-session middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -45,6 +45,12 @@ const server = https.createServer(
   },
   app
 );
+
+const io = new Server(server);
+
+io.on("connection", (socket) => {
+  console.log("Someone conneted");
+});
 
 const dbConnData = {
   host: process.env.MONGO_HOST || "127.0.0.1",
