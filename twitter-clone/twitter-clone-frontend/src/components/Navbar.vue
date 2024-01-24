@@ -15,6 +15,7 @@
           placeholder="Find user"
           @input="findUser($event.target.value)"
           @click="watchFocus"
+          name="userSearch"
         />
         <ul class="dropdown-list">
           <li class="dropdown-element" v-for="user in searchUsers">

@@ -16,7 +16,11 @@
       :post="post.initialPost"
     ></Post>
     <div class="post-container">
-      <div class="post" @click="elementClick($event.target, post._id)">
+      <div
+        class="post"
+        @click="elementClick($event.target, post._id)"
+        :id="post._id"
+      >
         <div class="post-headline">
           <div
             class="post-user"
@@ -107,14 +111,14 @@
         </div>
       </div>
       <div
-        v-if="commentSection === true && !toggleActive"
+        v-if="commentSection === true && toggleActive"
         v-for="repost in post.reposts.filter((rep) => !rep.disabled)"
       >
         <div class="separator"></div>
         <Post :post="repost"></Post>
       </div>
       <div
-        v-if="commentSection === true && toggleActive"
+        v-if="commentSection === true && !toggleActive"
         v-for="comment in post.comments.filter((com) => !com.disabled)"
       >
         <div class="separator"></div>
@@ -144,9 +148,11 @@ import useAuthStore from "../stores/AuthStore";
 import { ref, onMounted } from "vue";
 import axios from "../api/axios";
 import AddPost from "./AddPost.vue";
+import { socket } from "../socket";
 
 const router = useRouter();
 const route = useRoute();
+const auth = useAuthStore();
 const { login } = useAuthStore();
 const user = ref(null);
 const replyText = ref("");
@@ -172,7 +178,46 @@ onMounted(async () => {
       new Date(props.post.date)
     );
   }
+
+  const addViewForViewportPosts = () => {
+    const posts = document.querySelectorAll(".post");
+    posts.forEach((postElement) => {
+      if (elementInViewport(postElement)) {
+        socket.emit("postView", { postId: postElement.id, user: auth.login });
+      }
+    });
+  };
+  addViewForViewportPosts();
+
+  const scrollEndListener = () => {
+    addViewForViewportPosts();
+  };
+
+  if (!window.scrollEndListenerAdded) {
+    addEventListener("scrollend", scrollEndListener);
+    window.scrollEndListenerAdded = true;
+  }
 });
+
+function elementInViewport(el) {
+  var top = el.offsetTop;
+  var left = el.offsetLeft;
+  var width = el.offsetWidth;
+  var height = el.offsetHeight;
+
+  while (el.offsetParent) {
+    el = el.offsetParent;
+    top += el.offsetTop;
+    left += el.offsetLeft;
+  }
+
+  return (
+    top >= window.scrollY &&
+    left >= window.scrollX &&
+    top + height <= window.scrollY + window.innerHeight &&
+    left + width <= window.scrollX + window.innerWidth
+  );
+}
 
 const submitReply = async (formData) => {
   if (formData.type !== "click") {

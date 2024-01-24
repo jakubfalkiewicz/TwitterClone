@@ -8,6 +8,30 @@ const fs = require("fs");
 const path = require("path");
 
 function handlePostsRoute(io) {
+  const postViews = {};
+
+  io.on("connection", function (socket) {
+    socket.on("postView", async ({ postId, user }) => {
+      postViews[postId] = postViews[postId] || [];
+
+      const lastViewIndex = postViews[postId].findIndex(
+        (view) => view.userId === user
+      );
+
+      if (
+        lastViewIndex === -1 ||
+        (Date.now() - postViews[postId][lastViewIndex].timestamp > 60000 &&
+          user)
+      ) {
+        lastViewIndex === -1
+          ? postViews[postId].push({ userId: user, timestamp: Date.now() })
+          : (postViews[postId][lastViewIndex].timestamp = Date.now());
+
+        await Post.updateOne({ _id: postId }, { $inc: { views: 1 } });
+      }
+    });
+  });
+
   router.get("/", async (req, res) => {
     try {
       const posts = await Post.find({});
@@ -56,12 +80,12 @@ function handlePostsRoute(io) {
       const post = await Post.findById(postId)
         .populate({
           path: "comments",
-          options: { sort: { date: -1 } },
+          options: { sort: { views: -1 } },
           select: { initialPost: 0 },
         })
         .populate({
           path: "reposts",
-          options: { sort: { date: -1 } },
+          options: { sort: { views: -1 } },
           select: { initialPost: 0 },
         });
 

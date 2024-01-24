@@ -47,8 +47,6 @@ const server = https.createServer(
 
 const io = new Server(server);
 
-var socket = require("./socket.js");
-socket.start(io);
 app.use("/posts", posts(io));
 
 const dbConnData = {

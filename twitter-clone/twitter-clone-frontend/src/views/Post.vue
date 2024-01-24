@@ -28,7 +28,10 @@ onMounted(async () => {
   await axios.get(`/posts/${postId}`).then((res) => {
     post.value = res.data;
   });
+  socket.emit("postView", { postId: postId, user: auth.login });
+  socket.off("newPost");
   socket.on("newPost", (newPost) => {
+    console.log(newPost);
     if (
       newPost.initialPost._id == post.value._id &&
       newPost.author.login !== auth.login
@@ -36,12 +39,13 @@ onMounted(async () => {
       switch (newPost.type) {
         case "post":
           post.value.reposts.push({ ...newPost, initialPost: null });
+          alert("New repost has been added in this post");
           break;
         case "comment":
           post.value.comments.push(newPost);
+          alert("New comment has been added in this post");
           break;
       }
-      alert("New comment/repost has been added in this post");
     }
   });
 });
