@@ -37,9 +37,9 @@ onMounted(async () => {
   const query = route.query.page
     ? `/posts/feed?pageNumber=${route.query.page}`
     : `/posts/feed`;
-  const test = await axios.get(query);
-  posts.value = test.data.posts;
-  pages.value = test.data.pages;
+  const homeQuery = await axios.get(query);
+  posts.value = homeQuery.data.posts;
+  pages.value = homeQuery.data.pages;
 });
 </script>
 

@@ -33,7 +33,14 @@ onMounted(async () => {
       newPost.initialPost._id == post.value._id &&
       newPost.author.login !== auth.login
     ) {
-      post.value.comments.push(newPost);
+      switch (newPost.type) {
+        case "post":
+          post.value.reposts.push({ ...newPost, initialPost: null });
+          break;
+        case "comment":
+          post.value.comments.push(newPost);
+          break;
+      }
       alert("New comment/repost has been added in this post");
     }
   });

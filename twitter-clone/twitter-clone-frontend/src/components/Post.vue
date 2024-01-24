@@ -107,10 +107,15 @@
         </div>
       </div>
       <div
-        v-if="commentSection === true"
-        v-for="comment in toggleActive
-          ? post.reposts.filter((repost) => !repost.disabled)
-          : post.comments.filter((comments) => !comments.disabled)"
+        v-if="commentSection === true && !toggleActive"
+        v-for="repost in post.reposts.filter((rep) => !rep.disabled)"
+      >
+        <div class="separator"></div>
+        <Post :post="repost"></Post>
+      </div>
+      <div
+        v-if="commentSection === true && toggleActive"
+        v-for="comment in post.comments.filter((com) => !com.disabled)"
       >
         <div class="separator"></div>
         <Post :post="comment"></Post>
@@ -176,7 +181,7 @@ const submitReply = async (formData) => {
         props.post.comments.push(formData);
         break;
       case "post":
-        props.post.reposts.push(formData);
+        props.post.reposts.push({ ...formData, initialPost: null });
     }
     return;
   }

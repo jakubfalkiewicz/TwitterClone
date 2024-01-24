@@ -56,10 +56,12 @@ function handlePostsRoute(io) {
       const post = await Post.findById(postId)
         .populate({
           path: "comments",
+          options: { sort: { date: -1 } },
           select: { initialPost: 0 },
         })
         .populate({
           path: "reposts",
+          options: { sort: { date: -1 } },
           select: { initialPost: 0 },
         });
 
@@ -169,8 +171,15 @@ function handlePostsRoute(io) {
       const dbPost = await Post.findById(postId);
       if (dbPost.author.login === req.login) {
         await Post.updateMany(
-          { comments: postId },
-          { $pull: { comments: postId } }
+          {
+            $or: [{ comments: postId }, { reposts: postId }],
+          },
+          {
+            $pull: {
+              comments: postId,
+              reposts: postId,
+            },
+          }
         );
         if (dbPost.comments.length + dbPost.reposts.length === 0) {
           if (dbPost.photo) {
