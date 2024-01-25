@@ -34,7 +34,7 @@ function handlePostsRoute(io) {
 
   router.get("/", async (req, res) => {
     try {
-      const posts = await Post.find({});
+      const posts = await Post.find({}).sort({ views: 1 });
 
       res.json(posts);
     } catch (err) {

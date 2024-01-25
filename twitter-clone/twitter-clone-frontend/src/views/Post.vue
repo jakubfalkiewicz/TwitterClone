@@ -31,9 +31,8 @@ onMounted(async () => {
   socket.emit("postView", { postId: postId, user: auth.login });
   socket.off("newPost");
   socket.on("newPost", (newPost) => {
-    console.log(newPost);
     if (
-      newPost.initialPost._id == post.value._id &&
+      newPost.initialPost?._id == post.value._id &&
       newPost.author.login !== auth.login
     ) {
       switch (newPost.type) {

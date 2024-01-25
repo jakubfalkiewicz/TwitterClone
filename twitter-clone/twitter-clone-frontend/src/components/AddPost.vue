@@ -68,29 +68,29 @@ const handleSubmit = async () => {
     return;
   }
   formData.delete("text");
+  formData.delete("type");
+  formData.delete("initialPost");
   formData.append("text", postText.value);
+  formData.append("type", props.postType);
+  formData.append("initialPost", props.initialPost?._id);
   let newPost;
   if (props.httpRequest === "POST") {
-    if (!props.initialPost && file.value !== null) {
-      formData.delete("type");
-      formData.append("type", "post");
-      newPost = await axios.post("/posts/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-    } else {
-      newPost = await axios.post("/posts/", {
-        text: postText.value,
-        photo: null,
-        type: props.postType,
-        initialPost: props.initialPost,
-      });
-    }
+    newPost =
+      file.value !== null
+        ? await axios.post("/posts/", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+        : await axios.post("/posts/", {
+            text: postText.value,
+            photo: null,
+            type: props.postType,
+            initialPost: props.initialPost,
+          });
+
     emits("addPost", newPost.data);
   } else if (props.httpRequest === "PUT") {
-    formData.delete("type");
-    formData.append("type", "put");
     newPost = await axios.put(`/posts/${props.initialPost._id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
