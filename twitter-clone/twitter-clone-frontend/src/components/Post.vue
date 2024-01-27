@@ -37,7 +37,15 @@
               {{ post.author.login }}
             </div>
           </div>
-          <div>{{ post.date }}</div>
+          <div>
+            {{
+              !isNaN(new Date(props.post.date).getTime())
+                ? new Intl.DateTimeFormat("eu-PL", dateOptions).format(
+                    new Date(props.post.date)
+                  )
+                : props.post.date
+            }}
+          </div>
         </div>
         <div>
           {{ post.text }}
@@ -173,11 +181,6 @@ onMounted(async () => {
   await axios.get(`/users/${login}`).then((res) => {
     user.value = res.data;
   });
-  if (!isNaN(new Date(props.post.date).getTime())) {
-    props.post.date = new Intl.DateTimeFormat("eu-PL", dateOptions).format(
-      new Date(props.post.date)
-    );
-  }
 
   const addViewForViewportPosts = () => {
     const posts = document.querySelectorAll(".post");
@@ -236,6 +239,7 @@ const submitReply = async (formData) => {
     type: "comment",
     initialPost: route.params.postId,
   });
+  replyText.value = "";
   props.post.comments.push(reply.data);
 };
 

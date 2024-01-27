@@ -110,7 +110,8 @@ onMounted(async () => {
 });
 
 const addPost = (post) => {
-  posts.value = [...posts.value, post];
+  console.log(post);
+  posts.value = [post, ...posts.value];
 };
 
 const followUser = async (e) => {

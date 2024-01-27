@@ -6,6 +6,7 @@ const requireAuth = require("../auth/authMiddleware");
 const upload = require("../multerMiddleware/uploadAvatar");
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 
 function handlePostsRoute(io) {
   const postViews = {};
@@ -76,11 +77,29 @@ function handlePostsRoute(io) {
 
   router.get("/:postId", requireAuth, async (req, res) => {
     const postId = req.params.postId;
+    const commentsReceived = req.query?.commentsReceived
+      ?.split(",")
+      .map((comment) => mongoose.Types.ObjectId(comment));
+    const sliceSize = 5;
     try {
+      if (commentsReceived) {
+        const post = await Post.find({
+          initialPost: postId,
+          type: "comment",
+          _id: { $nin: commentsReceived },
+        })
+          .sort({ views: -1, date: 1 })
+          .limit(sliceSize);
+        if (post) {
+          return res.json(post);
+        } else {
+          return res.status(400);
+        }
+      }
       const post = await Post.findById(postId)
         .populate({
           path: "comments",
-          options: { sort: { views: -1 } },
+          options: { sort: { views: -1 }, limit: sliceSize },
           select: { initialPost: 0 },
         })
         .populate({

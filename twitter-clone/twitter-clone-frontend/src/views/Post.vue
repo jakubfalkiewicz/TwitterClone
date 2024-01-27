@@ -19,12 +19,12 @@ import { socket } from "../socket";
 import useAuthStore from "../stores/AuthStore";
 
 const auth = useAuthStore();
+const route = useRoute();
+const postId = route.params.postId;
 
 const post = ref(null);
-const route = useRoute();
 
 onMounted(async () => {
-  const postId = route.params.postId;
   await axios.get(`/posts/${postId}`).then((res) => {
     post.value = res.data;
   });
@@ -47,7 +47,24 @@ onMounted(async () => {
       }
     }
   });
+  window.onscroll = function (ev) {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+      loadComments();
+    }
+  };
 });
+
+const loadComments = async () => {
+  await axios
+    .get(
+      `/posts/${postId}?commentsReceived=${post.value.comments.map(
+        (com) => com._id
+      )}`
+    )
+    .then((res) => {
+      post.value.comments = post.value.comments.concat(res.data);
+    });
+};
 </script>
 
 <style lang="scss" scoped>
