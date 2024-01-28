@@ -38,7 +38,7 @@ const useAuthStore = defineStore(
     },
     getters: {
       isAuthenticated() {
-        return this.login !== null;
+        return !this.login ? false : true
       },
     },
   },

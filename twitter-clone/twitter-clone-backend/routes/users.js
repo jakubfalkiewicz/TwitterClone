@@ -22,8 +22,12 @@ router.get("/", async (req, res) => {
 
 router.get("/authenticate", requireAuth, async (req, res) => {
   try {
+    console.log(req.login)
     const user = await User.findOne({ login: req.login });
-    res.status(200).json(user);
+    if(user){
+     return res.status(200).json(user);
+    }
+    res.status(401).send("User unauthenticated")
   } catch (e) {
     console.log(e);
     throw new Error(e);

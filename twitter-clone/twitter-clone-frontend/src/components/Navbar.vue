@@ -1,15 +1,15 @@
 <template>
   <div id="navbar">
     <div class="navbar-row-1">
-      <button v-if="isAuthenticated" @click="navigateToHome">Home</button>
-      <button v-if="isAuthenticated" @click="navigateToAccount">Account</button>
-      <button v-if="isAuthenticated" @click="logOut">Logout</button>
-      <button v-if="!isAuthenticated" @click="navigateToRegister">
+      <button v-if="auth.isAuthenticated" @click="navigateToHome">Home</button>
+      <button v-if="auth.isAuthenticated" @click="navigateToAccount">Account</button>
+      <button v-if="auth.isAuthenticated" @click="logOut">Logout</button>
+      <button v-if="!auth.isAuthenticated" @click="navigateToRegister">
         Register
       </button>
-      <button v-if="!isAuthenticated" @click="navigateToLogin">Login</button>
+      <button v-if="!auth.isAuthenticated" @click="navigateToLogin">Login</button>
     </div>
-    <div class="navbar-row-2" v-if="isAuthenticated">
+    <div class="navbar-row-2" v-if="auth.isAuthenticated">
       <div>
         <input
           placeholder="Find user"
@@ -33,7 +33,6 @@ import axios from "../api/axios";
 import { useRouter } from "vue-router";
 import useAuthStore from "../stores/AuthStore";
 import { ref } from "vue";
-defineProps(["isAuthenticated"]);
 
 const auth = useAuthStore();
 const router = useRouter();
