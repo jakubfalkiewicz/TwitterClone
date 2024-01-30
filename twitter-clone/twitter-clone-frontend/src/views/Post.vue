@@ -55,15 +55,17 @@ onMounted(async () => {
 });
 
 const loadComments = async () => {
-  await axios
-    .get(
-      `/posts/${postId}?commentsReceived=${post.value.comments.map(
-        (com) => com._id
-      )}`
-    )
-    .then((res) => {
-      post.value.comments = post.value.comments.concat(res.data);
-    });
+  if (post.value.comments.length > 0) {
+    await axios
+      .get(
+        `/posts/${postId}?commentsReceived=${post.value.comments.map(
+          (com) => com._id
+        )}`
+      )
+      .then((res) => {
+        post.value.comments = post.value.comments.concat(res.data);
+      });
+  }
 };
 </script>
 

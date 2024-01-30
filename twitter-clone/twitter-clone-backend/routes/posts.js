@@ -76,12 +76,12 @@ function handlePostsRoute(io) {
   });
 
   router.get("/:postId", requireAuth, async (req, res) => {
-    const postId = req.params.postId;
-    const commentsReceived = req.query?.commentsReceived
-      ?.split(",")
-      .map((comment) => mongoose.Types.ObjectId(comment));
-    const sliceSize = 5;
     try {
+      const postId = req.params.postId;
+      const commentsReceived = req.query?.commentsReceived
+        ?.split(",")
+        .map((comment) => mongoose.Types.ObjectId(comment));
+      const sliceSize = 5;
       if (commentsReceived) {
         const post = await Post.find({
           initialPost: postId,
