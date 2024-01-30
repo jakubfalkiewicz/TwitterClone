@@ -72,9 +72,11 @@ const handleSubmit = async () => {
   formData.delete("initialPost");
   formData.append("text", postText.value);
   formData.append("type", props.postType);
-  formData.append("initialPost", props.initialPost?._id);
   let newPost;
   if (props.httpRequest === "POST") {
+    if (props.initialPost) {
+      formData.append("initialPost", props.initialPost._id);
+    }
     newPost =
       file.value !== null
         ? await axios.post("/posts/", formData, {
@@ -206,5 +208,6 @@ textarea {
   overflow: hidden;
   padding: 0.5rem 0 0.5rem 0.25rem;
   font-size: 1rem;
+  color: white;
 }
 </style>

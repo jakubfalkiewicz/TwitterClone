@@ -1,6 +1,6 @@
 <template>
-  <div id="account">
-    <div v-if="user != null">
+  <div id="account" v-if="user != null">
+    <div>
       <div>
         <img
           :width="50"
@@ -95,18 +95,21 @@ const showNewPostForm = ref(false);
 
 onMounted(async () => {
   const username = route.params.username;
-  await axios.get(`/users/${username}`).then((res) => {
-    user.value = res.data;
-  });
-  await axios.get(`/posts/byUser/${user.value._id}`).then((res) => {
-    posts.value = res.data?.filter(
-      (el) => el.type === "post" && el.disabled === false
-    );
-    replies.value = res.data?.filter(
-      (el) => el.type === "comment" && el.disabled === false
-    );
-  });
-  followed.value = follows.value?.includes(user.value._id);
+  try {
+    const dbUser = await axios.get(`/users/${username}`);
+    user.value = dbUser.data;
+    await axios.get(`/posts/byUser/${user.value._id}`).then((res) => {
+      posts.value = res.data?.filter(
+        (el) => el.type === "post" && el.disabled === false
+      );
+      replies.value = res.data?.filter(
+        (el) => el.type === "comment" && el.disabled === false
+      );
+    });
+    followed.value = follows.value?.includes(user.value._id);
+  } catch (err) {
+    alert(err.response.data.message);
+  }
 });
 
 const addPost = (post) => {

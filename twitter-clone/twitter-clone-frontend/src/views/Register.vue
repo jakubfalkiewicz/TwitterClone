@@ -7,6 +7,7 @@
       id="avatar-input"
       v-on:change="handleFileUpload($event)"
       type="file"
+      accept="image/png, image/jpeg, image/jpg"
     />
     <button @click="apiRegister">Register</button>
   </div>
@@ -27,6 +28,7 @@ const handleFileUpload = (event) => {
     alert("The file is too big. Please insert a file with maximum size of 1MB");
   } else {
     file.value = event.target.files[0];
+    formData.delete("file");
     formData.append("file", file.value);
   }
 };

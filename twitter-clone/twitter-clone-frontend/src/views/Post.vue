@@ -47,6 +47,9 @@ onMounted(async () => {
       }
     }
   });
+  window.onbeforeunload = function () {
+    window.scrollTo(0, 0);
+  };
   window.onscroll = function (ev) {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
       loadComments();
@@ -56,15 +59,12 @@ onMounted(async () => {
 
 const loadComments = async () => {
   if (post.value.comments.length > 0) {
-    await axios
-      .get(
-        `/posts/${postId}?commentsReceived=${post.value.comments.map(
-          (com) => com._id
-        )}`
-      )
-      .then((res) => {
-        post.value.comments = post.value.comments.concat(res.data);
-      });
+    const commentsToLoad = await axios.get(
+      `/posts/${postId}?commentsReceived=${post.value.comments.map(
+        (com) => com._id
+      )}`
+    );
+    post.value.comments = post.value.comments.concat(commentsToLoad.data);
   }
 };
 </script>

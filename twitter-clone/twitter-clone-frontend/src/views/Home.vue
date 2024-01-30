@@ -6,18 +6,45 @@
       :key="post._id"
       :post="post"
     ></Post>
-    <div v-if="pages > 1" class="page-select-container">
+    <div class="page-select-container">
+      <i
+        class="bi bi-arrow-left-short"
+        v-if="currPage && currPage !== 1"
+        @click="router.push(`/?page=${currPage - 1}`)"
+      ></i>
       <div
-        v-for="index in pages"
         class="page-select"
         :class="{
-          active:
-            index == $route.query.page || (!$route.query.page && index === 1),
+          active: 1 === currPage || !currPage,
         }"
-        @click="router.push(`/?page=${index}`)"
+        @click="router.push(`/?page=1`)"
       >
-        {{ index }}
+        1
       </div>
+      <div
+        v-if="currPage && currPage !== 1 && currPage !== pages"
+        class="page-select"
+        :class="{
+          active: pages !== currPage && currPage !== 1,
+        }"
+      >
+        {{ currPage }}
+      </div>
+      <div
+        v-if="pages > 1"
+        :class="{
+          active: pages == currPage,
+        }"
+        class="page-select"
+        @click="router.push(`/?page=${pages}`)"
+      >
+        {{ pages }}
+      </div>
+      <i
+        class="bi bi-arrow-right-short"
+        v-if="pages > 1 && currPage !== pages"
+        @click="router.push(`/?page=${currPage ? currPage + 1 : 2}`)"
+      ></i>
     </div>
     <div
       v-if="incomingPosts.length > 0"
@@ -44,10 +71,12 @@ const router = useRouter();
 const posts = ref(null);
 const pages = ref(1);
 const incomingPosts = ref([]);
+const currPage = ref(null);
 
 onMounted(async () => {
-  const query = route.query.page
-    ? `/posts/feed?pageNumber=${route.query.page}`
+  currPage.value = route.query.page ? Number.parseInt(route.query.page) : null;
+  const query = currPage.value
+    ? `/posts/feed?pageNumber=${currPage.value}`
     : `/posts/feed`;
   const homeQuery = await axios.get(query);
   posts.value = homeQuery.data.posts;
@@ -64,7 +93,7 @@ onMounted(async () => {
 });
 
 const showNewestPosts = () => {
-  if (!route.query?.page || 1 === route.query.page) {
+  if (!route.query?.page || 1 === currPage.value) {
     posts.value = incomingPosts.value.concat(posts.value).slice(0, 5);
     incomingPosts.value = [];
   } else {
@@ -103,6 +132,11 @@ const showNewestPosts = () => {
 }
 .page-select-container {
   display: flex;
+  align-items: center;
+  i {
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
   .page-select {
     padding: 0.5rem;
     border-radius: 100%;

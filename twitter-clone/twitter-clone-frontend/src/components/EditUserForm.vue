@@ -9,6 +9,7 @@
         id="avatar-input"
         v-on:change="handleFileUpload($event)"
         type="file"
+        accept="image/png, image/jpeg, image/jpg"
       />
     </div>
 
