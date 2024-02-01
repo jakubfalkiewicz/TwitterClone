@@ -73,7 +73,7 @@
             "
           >
             <i class="bi bi-chat-left-text"></i>
-            {{ post.comments?.length }}
+            {{ post.commentsLength || post.comments?.length }}
           </div>
           <div
             class="post-metadata"
@@ -181,7 +181,6 @@ onMounted(async () => {
   await axios.get(`/users/${login}`).then((res) => {
     user.value = res.data;
   });
-
   const addViewForViewportPosts = () => {
     const posts = document.querySelectorAll(".post");
     posts.forEach((postElement) => {
@@ -226,10 +225,10 @@ const submitReply = async (formData) => {
   if (formData.type !== "click") {
     switch (formData.type) {
       case "comment":
-        props.post.comments.push(formData);
+        props.post.comments.unshift(formData);
         break;
       case "post":
-        props.post.reposts.push({ ...formData, initialPost: null });
+        props.post.reposts.unshift({ ...formData, initialPost: null });
     }
     return;
   }
@@ -240,7 +239,8 @@ const submitReply = async (formData) => {
     initialPost: route.params.postId,
   });
   replyText.value = "";
-  props.post.comments.push(reply.data);
+  props.post.comments.unshift(reply.data);
+  props.post.commentsLength++;
 };
 
 const editPost = (post) => {

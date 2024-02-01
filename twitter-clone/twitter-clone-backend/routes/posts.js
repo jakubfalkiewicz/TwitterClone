@@ -96,6 +96,7 @@ function handlePostsRoute(io) {
           return res.status(400);
         }
       }
+      const initialPost = await Post.findById(postId);
       const post = await Post.findById(postId)
         .populate({
           path: "comments",
@@ -107,10 +108,12 @@ function handlePostsRoute(io) {
           options: { sort: { views: -1 } },
           select: { initialPost: 0 },
         });
-
       if (!post) {
         return res.status(404).json({ message: "Post not found", code: 404 });
       }
+      post.commentsLength = initialPost.comments.filter(
+        (comment) => !comment.disabled
+      ).length;
       res.json(post);
     } catch (err) {
       console.log(err.message);

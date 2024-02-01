@@ -8,6 +8,14 @@
     ></Post>
   </div>
   <div v-else>There is no content available under this URL</div>
+  <div
+    v-if="incomingPosts.length > 0"
+    class="incoming-posts"
+    @click="showNewestPosts"
+  >
+    <i class="bi bi-bell"></i>
+    <div>{{ incomingPosts.length }}</div>
+  </div>
 </template>
 
 <script setup>
@@ -23,6 +31,7 @@ const route = useRoute();
 const postId = route.params.postId;
 
 const post = ref(null);
+const incomingPosts = ref([]);
 
 onMounted(async () => {
   await axios.get(`/posts/${postId}`).then((res) => {
@@ -41,8 +50,10 @@ onMounted(async () => {
           alert("New repost has been added in this post");
           break;
         case "comment":
-          post.value.comments.push(newPost);
-          alert("New comment has been added in this post");
+          incomingPosts.value.push({
+            ...newPost,
+            initialPost: null,
+          });
           break;
       }
     }
@@ -56,6 +67,13 @@ onMounted(async () => {
     }
   };
 });
+
+const showNewestPosts = () => {
+  post.value.comments = incomingPosts.value
+    .concat(post.value.comments)
+    .slice(0, 5);
+  incomingPosts.value = [];
+};
 
 const loadComments = async () => {
   if (post.value.comments.length > 0) {
@@ -77,5 +95,22 @@ const loadComments = async () => {
   @media (max-width: 768px) {
     width: 100%;
   }
+}
+.incoming-posts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 89, 255, 0.315);
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  transition: all 0.3s ease;
+}
+.incoming-posts:hover {
+  background: rgb(0, 89, 255);
+  cursor: pointer;
 }
 </style>
