@@ -73,7 +73,7 @@
             "
           >
             <i class="bi bi-chat-left-text"></i>
-            {{ post.commentsLength || post.comments?.length }}
+            {{ post.commentsLength }}
           </div>
           <div
             class="post-metadata"
@@ -130,7 +130,10 @@
         v-for="comment in post.comments.filter((com) => !com.disabled)"
       >
         <div class="separator"></div>
-        <Post :post="comment"></Post>
+        <Post
+          v-on:comment-delete="props.post.commentsLength--"
+          :post="comment"
+        ></Post>
       </div>
     </div>
   </div>
@@ -151,6 +154,7 @@ const props = defineProps({
   showInitial: { type: Boolean, default: false },
   showMetadata: { type: Boolean, default: true },
 });
+const emits = defineEmits(["commentDelete"]);
 import { useRouter, useRoute } from "vue-router";
 import useAuthStore from "../stores/AuthStore";
 import { ref, onMounted } from "vue";
@@ -255,6 +259,7 @@ const handleDelete = async (id) => {
       router.push("/");
     }
     props.post.disabled = true;
+    emits("commentDelete");
   }
 };
 

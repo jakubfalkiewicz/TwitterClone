@@ -7,22 +7,34 @@ const useAuthStore = defineStore(
     state: () => ({
       login: null,
       follows: null,
+      blocked: null,
+      id: null,
       authRequestSent: false,
     }),
     actions: {
       logIn(user) {
         this.login = user.login;
         this.follows = user.follows;
+        this.blocked = user.blocked;
+        this.id = user._id;
       },
       logOut() {
         this.login = null;
         this.follows = null;
+        this.blocked = null;
+        this.id = null;
       },
       followUser(user) {
         this.follows.push(user);
       },
       unfollowUser(user) {
         this.follows = this.follows.filter((follow) => follow !== user);
+      },
+      blockUser(user) {
+        this.blocked.push(user);
+      },
+      unblockUser(user) {
+        this.blocked = this.blocked.filter((block) => block !== user);
       },
 
       async authenticate() {
@@ -38,7 +50,7 @@ const useAuthStore = defineStore(
     },
     getters: {
       isAuthenticated() {
-        return !this.login ? false : true
+        return !this.login ? false : true;
       },
     },
   },

@@ -1,5 +1,5 @@
 <template>
-  <div id="account" v-if="user != null">
+  <div id="account" v-if="user != null && !user.blocked.includes(id)">
     <div>
       <div>
         <img
@@ -18,8 +18,10 @@
           ></i>
         </div>
       </div>
-      <div v-if="login !== user.login">
-        <button v-if="!followed" @click="followUser">Follow</button>
+      <div class="user-account-actions" v-if="login !== user.login">
+        <button v-if="!isBlocked" @click="blockUser">Block</button>
+        <button v-else @click="unblockUser">Unblock</button>
+        <button v-if="!isFollowed" @click="followUser">Follow</button>
         <button v-else @click="unfollowUser">Unollow</button>
       </div>
     </div>
@@ -59,7 +61,11 @@
       v-if="replies != null && showPostType === 'comment'"
       :post="post"
     ></Post>
-    <!-- </div> -->
+  </div>
+  <div v-if="user && user.blocked.includes(id)">
+    <div>This user blocked you!</div>
+    <button v-if="!isBlocked" @click="blockUser">Block back</button>
+    <button v-else @click="unblockUser">Unblock</button>
   </div>
   <AddPost
     v-if="showNewPostForm"
@@ -82,13 +88,14 @@ import EditUserForm from "../components/EditUserForm.vue";
 import AddPost from "../components/AddPost.vue";
 
 const auth = useAuthStore();
-const { login, follows } = storeToRefs(auth);
+const { login, follows, blocked, id } = storeToRefs(auth);
 
 const user = ref(null);
 const posts = ref(null);
 const replies = ref(null);
 const route = useRoute();
-const followed = ref(null);
+const isFollowed = ref(null);
+const isBlocked = ref(null);
 const showPostType = ref("post");
 const showUserUpdate = ref(false);
 const showNewPostForm = ref(false);
@@ -106,7 +113,8 @@ onMounted(async () => {
         (el) => el.type === "comment" && el.disabled === false
       );
     });
-    followed.value = follows.value?.includes(user.value._id);
+    isFollowed.value = follows.value?.includes(user.value._id);
+    isBlocked.value = blocked.value?.includes(user.value._id);
   } catch (err) {
     alert(err.response.data.message);
   }
@@ -117,16 +125,30 @@ const addPost = (post) => {
   posts.value = [post, ...posts.value];
 };
 
+const blockUser = async (e) => {
+  e.preventDefault();
+  isBlocked.value = !isBlocked.value;
+  await axios.post("/users/block", { userId: user.value._id });
+  auth.blockUser(user.value._id);
+};
+
+const unblockUser = async (e) => {
+  e.preventDefault();
+  isBlocked.value = !isBlocked.value;
+  await axios.post("/users/unblock", { userId: user.value._id });
+  auth.unblockUser(user.value._id);
+};
+
 const followUser = async (e) => {
   e.preventDefault();
-  followed.value = !followed.value;
+  isFollowed.value = !isFollowed.value;
   await axios.post("/users/follow", { followedId: user.value._id });
   auth.followUser(user.value._id);
 };
 
 const unfollowUser = async (e) => {
   e.preventDefault();
-  followed.value = !followed.value;
+  isFollowed.value = !isFollowed.value;
   await axios.post("/users/unfollow", { unfollowedId: user.value._id });
   auth.unfollowUser(user.value._id);
 };
@@ -165,5 +187,9 @@ const unfollowUser = async (e) => {
 }
 .avatar {
   border-radius: 100%;
+}
+.user-account-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 </style>

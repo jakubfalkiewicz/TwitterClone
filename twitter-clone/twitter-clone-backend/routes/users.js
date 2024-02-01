@@ -22,12 +22,12 @@ router.get("/", async (req, res) => {
 
 router.get("/authenticate", requireAuth, async (req, res) => {
   try {
-    console.log(req.login)
+    console.log(req.login);
     const user = await User.findOne({ login: req.login });
-    if(user){
-     return res.status(200).json(user);
+    if (user) {
+      return res.status(200).json(user);
     }
-    res.status(401).send("User unauthenticated")
+    res.status(401).send("User unauthenticated");
   } catch (e) {
     console.log(e);
     throw new Error(e);
@@ -131,6 +131,34 @@ router.post("/unfollow", requireAuth, async (req, res) => {
     const user = await User.findOne({ _id: req.userId });
     if (user.follows.includes(userToUnfollow)) {
       user.follows = user.follows.filter((user) => user._id != userToUnfollow);
+      await User.updateOne({ _id: req.userId }, user);
+    }
+    res.status(200).send("Success");
+  } catch (e) {
+    throw new Error(e);
+  }
+});
+
+router.post("/block", requireAuth, async (req, res) => {
+  const userToBlock = req.body.userId;
+  try {
+    const user = await User.findOne({ _id: req.userId });
+    if (!user.blocked.includes(userToBlock)) {
+      user.blocked = [...user.blocked, userToBlock];
+      await User.updateOne({ _id: req.userId }, user);
+    }
+    res.status(200).send("Success");
+  } catch (e) {
+    throw new Error(e);
+  }
+});
+
+router.post("/unblock", requireAuth, async (req, res) => {
+  const userToUnblock = req.body.userId;
+  try {
+    const user = await User.findOne({ _id: req.userId });
+    if (user.blocked.includes(userToUnblock)) {
+      user.blocked = user.blocked.filter((user) => user._id != userToUnblock);
       await User.updateOne({ _id: req.userId }, user);
     }
     res.status(200).send("Success");

@@ -1,20 +1,26 @@
 <template>
-  <div v-if="!post?.disabled" class="posts">
+  <div
+    v-if="!post?.disabled && !post?.author.blocked.includes(auth.id)"
+    class="posts"
+  >
     <Post
       v-if="post !== null"
       :showInitial="true"
       :post="post"
       :commentSection="true"
     ></Post>
+    <div
+      v-if="incomingPosts.length > 0"
+      class="incoming-posts"
+      @click="showNewestPosts"
+    >
+      <i class="bi bi-bell"></i>
+      <div>{{ incomingPosts.length }}</div>
+    </div>
   </div>
-  <div v-else>There is no content available under this URL</div>
-  <div
-    v-if="incomingPosts.length > 0"
-    class="incoming-posts"
-    @click="showNewestPosts"
-  >
-    <i class="bi bi-bell"></i>
-    <div>{{ incomingPosts.length }}</div>
+  <div v-if="post?.disabled">There is no content available under this URL</div>
+  <div v-else-if="post?.author.blocked.includes(auth.id)">
+    The post content has been blocked for you by its author
   </div>
 </template>
 
