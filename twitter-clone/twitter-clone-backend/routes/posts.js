@@ -66,8 +66,11 @@ function handlePostsRoute(io) {
         .limit(pageSize)
         .sort({ date: -1 });
       res.status(200).send({
-        posts: posts,
-        pages: Math.ceil(postsNumber.length / pageSize),
+        posts: posts.filter((post) => !post.author.blocked.includes(userId)),
+        pages: Math.ceil(
+          postsNumber.filter((post) => !post.author.blocked.includes(userId))
+            .length / pageSize
+        ),
       });
     } catch (error) {
       console.error("Error fetching tweets:", error);

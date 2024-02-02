@@ -93,7 +93,14 @@ router.post("/login", (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.status(200).json({ login: user.login, follows: user.follows });
+      res
+        .status(200)
+        .json({
+          login: user.login,
+          follows: user.follows,
+          blocked: user.blocked,
+          id: user._id,
+        });
     });
   })(req, res, next);
 });
