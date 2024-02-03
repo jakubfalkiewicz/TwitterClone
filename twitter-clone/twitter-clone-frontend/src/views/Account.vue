@@ -116,6 +116,7 @@ onMounted(async () => {
     isFollowed.value = follows.value?.includes(user.value._id);
     isBlocked.value = blocked.value?.includes(user.value._id);
   } catch (err) {
+    console.log(err.response);
     alert(err.response.data.message);
   }
 });

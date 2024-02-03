@@ -9,6 +9,7 @@ const useAuthStore = defineStore(
       follows: null,
       blocked: null,
       id: null,
+      notifications: [],
       authRequestSent: false,
     }),
     actions: {
@@ -17,12 +18,14 @@ const useAuthStore = defineStore(
         this.follows = user.follows;
         this.blocked = user.blocked;
         this.id = user._id;
+        this.notifications = user.notifications;
       },
       logOut() {
         this.login = null;
         this.follows = null;
         this.blocked = null;
         this.id = null;
+        this.notifications = [];
       },
       followUser(user) {
         this.follows.push(user);
@@ -35,6 +38,14 @@ const useAuthStore = defineStore(
       },
       unblockUser(user) {
         this.blocked = this.blocked.filter((block) => block !== user);
+      },
+      removeNotification(notificationId) {
+        this.notifications = this.notifications.filter(
+          (notification) => notification.id !== notificationId
+        );
+      },
+      removeAllNotifications() {
+        this.notifications = [];
       },
 
       async authenticate() {

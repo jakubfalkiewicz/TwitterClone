@@ -2,12 +2,39 @@
   <div id="navbar">
     <div class="navbar-row-1">
       <button v-if="auth.isAuthenticated" @click="navigateToHome">Home</button>
-      <button v-if="auth.isAuthenticated" @click="navigateToAccount">Account</button>
+      <div v-if="auth.isAuthenticated" class="account-container">
+        <button v-if="auth.isAuthenticated" @click="navigateToAccount">
+          Account
+        </button>
+        <div
+          class="notifications-box"
+          @click="showNotifications = !showNotifications"
+        >
+          <i class="bi bi-envelope"></i>
+          <div>{{ auth?.notifications?.length }}</div>
+        </div>
+        <div class="notifications-modal" v-if="showNotifications">
+          <div class="notifications-header">
+            <div>NOTIFICATIONS</div>
+            <i
+              @click="showNotifications = !showNotifications"
+              class="bi bi-x-lg"
+            ></i>
+          </div>
+          <div class="notification" v-for="notification in auth.notifications">
+            {{ notification.user.login }} {{ notification.text }}
+            <i class="bi bi-trash"></i>
+          </div>
+          <button @click="deleteAllNotifications">DELETE ALL</button>
+        </div>
+      </div>
       <button v-if="auth.isAuthenticated" @click="logOut">Logout</button>
       <button v-if="!auth.isAuthenticated" @click="navigateToRegister">
         Register
       </button>
-      <button v-if="!auth.isAuthenticated" @click="navigateToLogin">Login</button>
+      <button v-if="!auth.isAuthenticated" @click="navigateToLogin">
+        Login
+      </button>
     </div>
     <div class="navbar-row-2" v-if="auth.isAuthenticated">
       <div>
@@ -37,6 +64,7 @@ import { ref } from "vue";
 const auth = useAuthStore();
 const router = useRouter();
 const searchUsers = ref(null);
+const showNotifications = ref(false);
 
 const findUser = async (input) => {
   if (input) {
@@ -45,6 +73,12 @@ const findUser = async (input) => {
   } else {
     searchUsers.value = null;
   }
+};
+
+const deleteAllNotifications = async () => {
+  await axios.delete("/users/notification?deleteAll=true");
+  auth.removeAllNotifications();
+  showNotifications.value = !showNotifications.value;
 };
 
 let mousedownListener;
@@ -97,6 +131,52 @@ const logOut = async () => {
     display: flex;
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    .account-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      .notifications-box {
+        display: flex;
+        gap: 0.5rem;
+        border: 1px solid white;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
+      .notifications-box:hover {
+        box-shadow: rgba(255, 255, 255, 0.35) 0px 5px 15px;
+      }
+      .notifications-modal {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 1rem;
+        background: black;
+        width: 100%;
+        min-width: 300px;
+        max-width: 500px;
+        .notifications-header {
+          display: flex;
+          justify-content: space-between;
+          i {
+            cursor: pointer;
+          }
+        }
+        .notification {
+          padding: 0.25rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          i {
+            color: rgb(190, 32, 32);
+          }
+        }
+      }
+    }
   }
   .navbar-row-2 {
     display: flex;

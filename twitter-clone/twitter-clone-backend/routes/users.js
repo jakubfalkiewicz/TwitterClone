@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const Notification = require("../models/Notification");
 const passport = require("../auth/passportConfig");
 const requireAuth = require("../auth/authMiddleware");
 const upload = require("../multerMiddleware/uploadAvatar");
@@ -93,14 +94,13 @@ router.post("/login", (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res
-        .status(200)
-        .json({
-          login: user.login,
-          follows: user.follows,
-          blocked: user.blocked,
-          id: user._id,
-        });
+      res.status(200).json({
+        login: user.login,
+        follows: user.follows,
+        blocked: user.blocked,
+        notifications: user.notifications,
+        id: user._id,
+      });
     });
   })(req, res, next);
 });
@@ -147,12 +147,19 @@ router.post("/unfollow", requireAuth, async (req, res) => {
 });
 
 router.post("/block", requireAuth, async (req, res) => {
-  const userToBlock = req.body.userId;
   try {
-    const user = await User.findOne({ _id: req.userId });
-    if (!user.blocked.includes(userToBlock)) {
-      user.blocked = [...user.blocked, userToBlock];
-      await User.updateOne({ _id: req.userId }, user);
+    const userToBlock = await User.findOne({ _id: req.body.userId });
+    const userBlocking = await User.findOne({ _id: req.userId });
+    if (!userBlocking.blocked.includes(userToBlock)) {
+      userBlocking.blocked = [...userBlocking.blocked, userToBlock._id];
+      const notification = await Notification.create({
+        user: userBlocking._id,
+        text: " has blocked you.",
+        date: Date.now(),
+      });
+      userToBlock.notifications = [...userToBlock.notifications, notification];
+      await User.updateOne({ _id: req.userId }, userBlocking);
+      await User.updateOne({ _id: userToBlock._id }, userToBlock);
     }
     res.status(200).send("Success");
   } catch (e) {
@@ -161,13 +168,42 @@ router.post("/block", requireAuth, async (req, res) => {
 });
 
 router.post("/unblock", requireAuth, async (req, res) => {
-  const userToUnblock = req.body.userId;
+  try {
+    const userToUnblock = await User.findOne({ _id: req.body.userId });
+    const userUnblocking = await User.findOne({ _id: req.userId });
+    if (userUnblocking.blocked.includes(userToUnblock._id)) {
+      userUnblocking.blocked = userUnblocking.blocked.filter(
+        (user) => user != req.body.userId
+      );
+      const notification = await Notification.create({
+        user: userUnblocking._id,
+        text: " has unblocked you.",
+        date: Date.now(),
+      });
+      userToUnblock.notifications = userToUnblock.notifications = [
+        ...userToUnblock.notifications,
+        notification,
+      ];
+      await User.updateOne({ _id: req.userId }, userUnblocking);
+      await User.updateOne({ _id: userToUnblock._id }, userToUnblock);
+    }
+    res.status(200).send("Success");
+  } catch (e) {
+    throw new Error(e);
+  }
+});
+
+router.delete("/notification", requireAuth, async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.userId });
-    if (user.blocked.includes(userToUnblock)) {
-      user.blocked = user.blocked.filter((user) => user._id != userToUnblock);
-      await User.updateOne({ _id: req.userId }, user);
+    if (req.query.deleteAll === "true") {
+      user.notifications = [];
+    } else {
+      user.notifications = user.notifications.filter(
+        (notification) => notification.id !== req.body.notificationId
+      );
     }
+    await User.updateOne({ _id: req.userId }, user);
     res.status(200).send("Success");
   } catch (e) {
     throw new Error(e);
@@ -212,23 +248,26 @@ router.get("/search/:username", requireAuth, async (req, res) => {
   }
 });
 
-router.delete("/deleteAll", async (req, res) => {
-  await User.deleteMany({});
-  return res.send("Deleted all");
-});
+// router.post("/addNotifications", async (req, res) => {
+//   const users = await User.find({});
+//   users.forEach(async (user) => {
+//     var us = await User.findById(user._id);
+//     us.notifications = [];
+//     await User.findOneAndUpdate({ _id: user._id }, us);
+//   });
+//   return res.send(200);
+// });
+
+// router.delete("/deleteAll", async (req, res) => {
+//   await User.deleteMany({});
+//   return res.send("Deleted all");
+// });
 
 router.delete("/:userId", async (req, res) => {
   const id = req.params.userId;
   const userToDelete = await User.findByIdAndDelete({ _id: id });
   return res.send({
     deletedUserId: id,
-  });
-});
-
-router.patch("/:userId", async (req, res) => {
-  const id = req.params.userId;
-  return res.send({
-    patchUserId: id,
   });
 });
 

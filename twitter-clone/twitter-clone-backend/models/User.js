@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
+const Notification = require("./Notification");
 
 const saltRounds = 10; // You can adjust this based on your security requirements
 
@@ -9,10 +10,28 @@ const userSchema = new Schema({
   avatar: { type: String, required: false },
   email: { type: String, required: false, default: "" },
   admin: { type: Boolean, default: false },
-  registrationDate: { type: Date, default: Date.now },
-  follows: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  blocked: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  registrationDate: { type: Date, default: Date.now, required: true },
+  follows: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
+  blocked: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
+  notifications: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Notification",
+      required: true,
+    },
+  ],
 });
+
+var autoPopulateFields = function (next) {
+  try {
+    this.populate({
+      path: "notifications",
+    });
+  } catch (err) {
+    console.log(err.message);
+  }
+  next();
+};
 
 userSchema.virtual("avatarUrl").get(function () {
   let avatar = this.avatar ? this.avatar : "avatar.png";
@@ -31,6 +50,8 @@ userSchema.pre("save", async function (next) {
     return next(error);
   }
 });
+
+userSchema.pre("find", autoPopulateFields).pre("findOne", autoPopulateFields);
 
 userSchema.set("toJSON", { virtuals: true });
 userSchema.set("toObject", { virtuals: true });

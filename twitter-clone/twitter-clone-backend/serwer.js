@@ -28,10 +28,8 @@ app.use(
 );
 
 const users = require("./routes/users");
-const messages = require("./routes/messages");
 const posts = require("./routes/posts");
 app.use("/users", users);
-app.use("/messages", messages);
 app.use(express.static("public"));
 app.use("/uploads", express.static("uploads"));
 

@@ -189,6 +189,7 @@ function handlePostsRoute(io) {
       date: new Date(),
       comments: [],
       reposts: [],
+      notifications: [],
       photo: req.file?.filename,
       views: 0,
     };
