@@ -29,7 +29,6 @@ app.use(
 
 const users = require("./routes/users");
 const posts = require("./routes/posts");
-app.use("/users", users);
 app.use(express.static("public"));
 app.use("/uploads", express.static("uploads"));
 
@@ -46,6 +45,7 @@ const server = https.createServer(
 const io = new Server(server);
 
 app.use("/posts", posts(io));
+app.use("/users", users(io));
 
 const dbConnData = {
   host: process.env.MONGO_HOST || "127.0.0.1",

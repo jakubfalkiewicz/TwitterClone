@@ -39,9 +39,12 @@ const useAuthStore = defineStore(
       unblockUser(user) {
         this.blocked = this.blocked.filter((block) => block !== user);
       },
+      addNotification(notification) {
+        this.notifications.push(notification);
+      },
       removeNotification(notificationId) {
         this.notifications = this.notifications.filter(
-          (notification) => notification.id !== notificationId
+          (notification) => notification._id !== notificationId
         );
       },
       removeAllNotifications() {

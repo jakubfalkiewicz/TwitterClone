@@ -23,9 +23,17 @@
           </div>
           <div class="notification" v-for="notification in auth.notifications">
             {{ notification.user?.login }} {{ notification.text }}
-            <i class="bi bi-trash"></i>
+            <i
+              @click="deleteNotification(notification._id)"
+              class="bi bi-trash"
+            ></i>
           </div>
-          <button @click="deleteAllNotifications">DELETE ALL</button>
+          <button
+            v-if="auth.notifications.length > 0"
+            @click="deleteAllNotifications"
+          >
+            DELETE ALL
+          </button>
         </div>
       </div>
       <button v-if="auth.isAuthenticated" @click="logOut">Logout</button>
@@ -59,12 +67,20 @@
 import axios from "../api/axios";
 import { useRouter } from "vue-router";
 import useAuthStore from "../stores/AuthStore";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { socket } from "../socket";
 
 const auth = useAuthStore();
 const router = useRouter();
 const searchUsers = ref(null);
 const showNotifications = ref(false);
+
+onMounted(() => {
+  console.log(auth.login);
+  socket.on(`notification_${auth.login}`, (notification) => {
+    auth.addNotification(notification);
+  });
+});
 
 const findUser = async (input) => {
   if (input) {
@@ -79,6 +95,11 @@ const deleteAllNotifications = async () => {
   await axios.delete("/users/notification?deleteAll=true");
   auth.removeAllNotifications();
   showNotifications.value = !showNotifications.value;
+};
+
+const deleteNotification = async (notificationId) => {
+  await axios.delete(`/users/notification?notificationId=${notificationId}`);
+  auth.removeNotification(notificationId);
 };
 
 let mousedownListener;
