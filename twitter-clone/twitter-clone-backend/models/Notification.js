@@ -10,7 +10,7 @@ var autoPopulateFields = function (next) {
   try {
     this.populate({
       path: "user",
-      select: "login",
+      select: { notifications: 0, login: 1 },
     });
   } catch (err) {
     console.log(err.message);

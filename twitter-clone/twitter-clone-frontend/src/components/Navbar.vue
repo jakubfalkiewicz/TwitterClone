@@ -22,7 +22,7 @@
             ></i>
           </div>
           <div class="notification" v-for="notification in auth.notifications">
-            {{ notification.user.login }} {{ notification.text }}
+            {{ notification.user?.login }} {{ notification.text }}
             <i class="bi bi-trash"></i>
           </div>
           <button @click="deleteAllNotifications">DELETE ALL</button>
