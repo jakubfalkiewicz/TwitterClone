@@ -100,7 +100,7 @@ function handleUsersRoute(io) {
           follows: user.follows,
           blocked: user.blocked,
           notifications: user.notifications,
-          id: user._id,
+          userId: user._id,
         });
       });
     })(req, res, next);

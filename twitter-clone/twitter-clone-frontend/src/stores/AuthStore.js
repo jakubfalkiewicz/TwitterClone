@@ -8,7 +8,7 @@ const useAuthStore = defineStore(
       login: null,
       follows: null,
       blocked: null,
-      id: null,
+      userId: null,
       notifications: [],
       authRequestSent: false,
     }),
@@ -17,14 +17,14 @@ const useAuthStore = defineStore(
         this.login = user.login;
         this.follows = user.follows;
         this.blocked = user.blocked;
-        this.id = user._id;
+        this.userId = user.userId || user._id;
         this.notifications = user.notifications;
       },
       logOut() {
         this.login = null;
         this.follows = null;
         this.blocked = null;
-        this.id = null;
+        this.userId = null;
         this.notifications = [];
       },
       followUser(user) {

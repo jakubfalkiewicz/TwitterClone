@@ -1,5 +1,5 @@
 <template>
-  <div id="account" v-if="user != null && !user.blocked.includes(id)">
+  <div id="account" v-if="user != null && !user.blocked.includes(userId)">
     <div>
       <div>
         <img
@@ -62,7 +62,7 @@
       :post="post"
     ></Post>
   </div>
-  <div v-if="user && user.blocked.includes(id)">
+  <div v-if="user && user.blocked.includes(userId)">
     <div>This user blocked you!</div>
     <button v-if="!isBlocked" @click="blockUser">Block back</button>
     <button v-else @click="unblockUser">Unblock</button>
@@ -88,7 +88,7 @@ import EditUserForm from "../components/EditUserForm.vue";
 import AddPost from "../components/AddPost.vue";
 
 const auth = useAuthStore();
-const { login, follows, blocked, id } = storeToRefs(auth);
+const { login, follows, blocked, userId } = storeToRefs(auth);
 
 const user = ref(null);
 const posts = ref(null);
