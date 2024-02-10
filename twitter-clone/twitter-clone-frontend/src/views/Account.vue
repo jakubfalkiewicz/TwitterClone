@@ -1,5 +1,5 @@
 <template>
-  <div id="account" v-if="user != null && !user.blocked.includes(userId)">
+  <div id="account" v-if="user != null && !user.blocked?.includes(userId)">
     <div>
       <div>
         <img
@@ -122,7 +122,6 @@ onMounted(async () => {
 });
 
 const addPost = (post) => {
-  console.log(post);
   posts.value = [post, ...posts.value];
 };
 
@@ -187,6 +186,7 @@ const unfollowUser = async (e) => {
   display: flex;
 }
 .avatar {
+object-fit: cover;
   border-radius: 100%;
 }
 .user-account-actions {

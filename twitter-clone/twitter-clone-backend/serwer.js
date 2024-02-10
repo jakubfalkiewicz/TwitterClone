@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: ["https://localhost:5173"],
+    origin: ["https://localhost:5173", "https://localhost:5000", "https://192.168.113.86:5173/"],
   })
 );
 
@@ -31,6 +31,7 @@ const users = require("./routes/users");
 const posts = require("./routes/posts");
 app.use(express.static("public"));
 app.use("/uploads", express.static("uploads"));
+app.use(express.static(__dirname + '/public'))
 
 require("dotenv").config();
 

@@ -4,6 +4,10 @@ const notificationSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   text: { type: String, required: true },
   date: { type: Date, required: true },
+  type: {
+    type: String,
+    enum: ["block", "unblock"]
+  },
 });
 
 var autoPopulateFields = function (next) {

@@ -23,7 +23,6 @@ module.exports = passport.use(
     async (req, username, password, done) => {
       try {
         const user = await User.findOne({ login: username }).exec();
-        console.log(user);
         if (!user) {
           return done("Incorrect login", null);
         }

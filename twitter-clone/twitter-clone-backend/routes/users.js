@@ -24,7 +24,6 @@ function handleUsersRoute(io) {
 
   router.get("/authenticate", requireAuth, async (req, res) => {
     try {
-      console.log(req.login);
       const user = await User.findOne({ login: req.login });
       if (user) {
         return res.status(200).json(user);
@@ -159,6 +158,7 @@ function handleUsersRoute(io) {
           user: userBlocking._id,
           text: " has blocked you.",
           date: Date.now(),
+          type: "block"
         });
         userToBlock.notifications = [
           ...userToBlock.notifications,
@@ -187,6 +187,7 @@ function handleUsersRoute(io) {
           user: userUnblocking._id,
           text: " has unblocked you.",
           date: Date.now(),
+          type: "unblock"
         });
         userToUnblock.notifications = userToUnblock.notifications = [
           ...userToUnblock.notifications,
@@ -195,7 +196,6 @@ function handleUsersRoute(io) {
         await User.updateOne({ _id: req.userId }, userUnblocking);
         await User.updateOne({ _id: userToUnblock._id }, userToUnblock);
         notification.user = userUnblocking;
-        console.log(userToUnblock.login);
         io.emit(`notification_${userToUnblock.login}`, notification);
       }
       res.status(200).send("Success");

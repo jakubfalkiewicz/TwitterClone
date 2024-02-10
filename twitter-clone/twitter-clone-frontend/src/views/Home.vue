@@ -81,7 +81,7 @@ onMounted(async () => {
   const homeQuery = await axios.get(query);
   posts.value = homeQuery.data.posts;
   pages.value = homeQuery.data.pages;
-  socket.off("newPost");
+    socket.off("newPost");
   socket.on("newPost", (newPost) => {
     if (auth.follows.includes(newPost.author._id) && newPost.type === "post") {
       incomingPosts.value.push({
@@ -94,7 +94,7 @@ onMounted(async () => {
 
 const showNewestPosts = () => {
   if (!route.query?.page || 1 === currPage.value) {
-    posts.value = incomingPosts.value.concat(posts.value).slice(0, 5);
+    posts.value = incomingPosts.value.reverse().concat(posts.value).slice(0, 5);
     incomingPosts.value = [];
   } else {
     router.push(`/?page=${1}`);

@@ -8,6 +8,7 @@ export default defineConfig({
         target: "https://localhost:5000",
         changeOrigin: true,
         secure: false,
+        ws: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
@@ -25,5 +26,5 @@ export default defineConfig({
       cert: "./certificate.crt",
     },
   },
-  plugins: [vue()],
+  plugins: [vue()]
 });
