@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
 const Notification = require("./Notification");
+const ipAddress = require("../ipAddressProvider")
 
 const saltRounds = 10; // You can adjust this based on your security requirements
 
@@ -35,7 +36,7 @@ var autoPopulateFields = function (next) {
 
 userSchema.virtual("avatarUrl").get(function () {
   let avatar = this.avatar ? this.avatar : "avatar.png";
-  return `https://192.168.0.164:${process.env.API_PORT}/uploads/${avatar}`;
+  return `https://${ipAddress}:${process.env.API_PORT}/uploads/${avatar}`;
   // return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${avatar}`;
 });
 
