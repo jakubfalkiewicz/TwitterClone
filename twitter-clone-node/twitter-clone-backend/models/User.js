@@ -35,7 +35,8 @@ var autoPopulateFields = function (next) {
 
 userSchema.virtual("avatarUrl").get(function () {
   let avatar = this.avatar ? this.avatar : "avatar.png";
-  return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${avatar}`;
+  return `https://192.168.0.164:${process.env.API_PORT}/uploads/${avatar}`;
+  // return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${avatar}`;
 });
 
 userSchema.pre("save", async function (next) {

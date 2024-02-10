@@ -43,7 +43,8 @@ var autoPopulateFields = function (next) {
 
 postSchema.virtual("imageUrl").get(function () {
   if (this.photo) {
-    return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${this.photo}`;
+    return `https://192.168.0.164:${process.env.API_PORT}/uploads/${this.photo}`;
+    // return `https://${process.env.API_HOST}:${process.env.API_PORT}/uploads/${this.photo}`;
   }
   return null;
 });

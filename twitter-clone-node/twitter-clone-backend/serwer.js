@@ -7,6 +7,7 @@ const https = require("https");
 const path = require("path");
 const cors = require("cors");
 const { Server } = require("socket.io");
+const ipAddress = require("./ipAddressProvider")
 
 app.use(
   cookieSession({
@@ -23,7 +24,7 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: ["https://localhost:5173"],
+    origin: ["https://localhost:5173", "https://192.168.0.164:5173"],
   })
 );
 
@@ -68,7 +69,7 @@ mongoose
       `Connected to MongoDB. Database name: "${response.connections[0].name}"`
     );
     const apiPort = process.env.API_PORT;
-    const apiHost = process.env.API_HOST;
+    const apiHost = ipAddress;
 
     server.listen(apiPort, () => {
       console.log(`API server available from: https://${apiHost}:${apiPort}`);
