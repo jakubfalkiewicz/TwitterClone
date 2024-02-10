@@ -1,2 +1,4 @@
 .key
 .cert
+dist
+public
