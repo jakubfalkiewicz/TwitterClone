@@ -47,9 +47,43 @@ function handlePostsRoute(io) {
     }
   });
 
+  // router.get("/feed", requireAuth, async (req, res) => {
+  //   const userId = req.userId;
+  //   const pageNumber = req.query.pageNumber || 1;
+  //   const skipNew = req.query.skipNew || 0;
+  //   const pageSize = 5;
+  //   try {
+  //     const user = await User.findById(userId).populate("follows");
+  //     const followerIds = user.follows.map((follower) => follower._id);
+  //     const postsNumber = await Post.find({
+  //       author: { $in: followerIds },
+  //       type: "post",
+  //     });
+  //     const posts = await Post.find({
+  //       author: { $in: followerIds },
+  //       type: "post",
+  //     })
+  //       .skip((pageNumber - 1) * pageSize + parseInt(skipNew))
+  //       .limit(pageSize)
+  //       .sort({ date: -1 });
+  //     res.status(200).send({
+  //       posts: posts.filter((post) => !post.author.blocked.includes(userId)),
+  //       pages: Math.ceil(
+  //         postsNumber.filter((post) => !post.author.blocked.includes(userId))
+  //           .length / pageSize
+  //       ),
+  //     });
+  //   } catch (error) {
+  //     console.error("Error fetching tweets:", error);
+  //     res.status(500).json({ error: "Internal Server Error" });
+  //   }
+  // });
+
   router.get("/feed", requireAuth, async (req, res) => {
     const userId = req.userId;
     const pageNumber = req.query.pageNumber || 1;
+    const lastIndexId = req.query.lastIndexId;
+    const firstIndexId = req.query.firstIndexId;
     const pageSize = 5;
     try {
       const user = await User.findById(userId).populate("follows");
@@ -58,15 +92,54 @@ function handlePostsRoute(io) {
         author: { $in: followerIds },
         type: "post",
       });
+      if (lastIndexId) {
+        const posts = await Post.find({
+          author: { $in: followerIds },
+          type: "post",
+        }).sort({ date: -1 });
+        const lastIndex =
+          posts
+            .filter((post) => !post.author.blocked.includes(userId))
+            .findIndex((post) => post._id == lastIndexId) + 1;
+        return res.status(200).send({
+          posts: posts
+            .filter((post) => !post.author.blocked.includes(userId))
+            .slice(lastIndex, lastIndex + 5),
+          pages: Math.ceil(
+            postsNumber.filter((post) => !post.author.blocked.includes(userId))
+              .length / pageSize
+          ),
+        });
+      }
+      if (firstIndexId) {
+        const posts = await Post.find({
+          author: { $in: followerIds },
+          type: "post",
+        }).sort({ date: -1 });
+        const firstIndex =
+          posts
+            .filter((post) => !post.author.blocked.includes(userId))
+            .findIndex((post) => post._id == firstIndexId) + 1;
+        return res.status(200).send({
+          posts: posts
+            .filter((post) => !post.author.blocked.includes(userId))
+            .slice(firstIndex - 6, firstIndex - 1),
+          pages: Math.ceil(
+            postsNumber.filter((post) => !post.author.blocked.includes(userId))
+              .length / pageSize
+          ),
+        });
+      }
       const posts = await Post.find({
         author: { $in: followerIds },
         type: "post",
       })
         .skip((pageNumber - 1) * pageSize)
-        .limit(pageSize)
         .sort({ date: -1 });
-      res.status(200).send({
-        posts: posts.filter((post) => !post.author.blocked.includes(userId)),
+      return res.status(200).send({
+        posts: posts
+          .filter((post) => !post.author.blocked.includes(userId))
+          .slice(0, 5),
         pages: Math.ceil(
           postsNumber.filter((post) => !post.author.blocked.includes(userId))
             .length / pageSize

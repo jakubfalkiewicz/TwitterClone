@@ -9,20 +9,20 @@
     <div class="page-select-container">
       <i
         class="bi bi-arrow-left-short"
-        v-if="currPage && currPage !== 1"
-        @click="router.push(`/?page=${currPage - 1}`)"
+        v-if="currPage !== 1"
+        @click="loadPagePosts(currPage - 1)"
       ></i>
       <div
         class="page-select"
         :class="{
-          active: 1 === currPage || !currPage,
+          active: 1 === currPage,
         }"
-        @click="router.push(`/?page=1`)"
+        @click="loadPagePosts(1)"
       >
         1
       </div>
       <div
-        v-if="currPage && currPage !== 1 && currPage !== pages"
+        v-if="currPage !== 1 && currPage !== pages"
         class="page-select"
         :class="{
           active: pages !== currPage && currPage !== 1,
@@ -33,17 +33,17 @@
       <div
         v-if="pages > 1"
         :class="{
-          active: pages == currPage,
+          active: pages === currPage,
         }"
         class="page-select"
-        @click="router.push(`/?page=${pages}`)"
+        @click="loadPagePosts(pages)"
       >
         {{ pages }}
       </div>
       <i
         class="bi bi-arrow-right-short"
         v-if="pages > 1 && currPage !== pages"
-        @click="router.push(`/?page=${currPage ? currPage + 1 : 2}`)"
+        @click="loadPagePosts(currPage + 1)"
       ></i>
     </div>
     <div
@@ -61,23 +61,20 @@
 import axios from "../api/axios";
 import { ref, onMounted } from "vue";
 import Post from "../components/Post.vue";
-import { useRoute, useRouter } from "vue-router";
 import { socket } from "../socket";
 import useAuthStore from "../stores/AuthStore";
 
 const auth = useAuthStore();
-const route = useRoute();
-const router = useRouter();
 const posts = ref(null);
 const pages = ref(1);
 const incomingPosts = ref([]);
-const currPage = ref(null);
+const currPage = ref(1);
 
 onMounted(async () => {
-  currPage.value = route.query.page ? Number.parseInt(route.query.page) : null;
-  const query = currPage.value
-    ? `/posts/feed?pageNumber=${currPage.value}`
-    : `/posts/feed`;
+  const query =
+    currPage.value > 1
+      ? `/posts/feed?pageNumber=${currPage.value}`
+      : `/posts/feed`;
   const homeQuery = await axios.get(query);
   posts.value = homeQuery.data.posts;
   pages.value = homeQuery.data.pages;
@@ -92,13 +89,44 @@ onMounted(async () => {
   });
 });
 
-const showNewestPosts = () => {
-  if (!route.query?.page || 1 === currPage.value) {
-    posts.value = incomingPosts.value.concat(posts.value).slice(0, 5);
-    incomingPosts.value = [];
-  } else {
-    router.push(`/?page=${1}`);
+// const loadPagePosts = async (newPage) => {
+//   currPage.value = newPage;
+//   const nextPagePosts = await axios.get(
+//     `/posts/feed?pageNumber=${currPage.value}&skipNew=${incomingPosts.value.length}`
+//   );
+//   posts.value = nextPagePosts.data.posts;
+//   pages.value = nextPagePosts.data.pages;
+// };
+
+const loadPagePosts = async (newPage) => {
+  if (newPage > currPage.value) {
+    const nextPagePosts = await axios.get(
+      `/posts/feed?lastIndexId=${posts.value[posts.value.length - 1]._id}`
+    );
+    posts.value = nextPagePosts.data.posts;
+    pages.value = nextPagePosts.data.pages;
+    currPage.value = newPage;
+  } else if (newPage < currPage.value) {
+    const prevPagePosts = await axios.get(
+      `/posts/feed?firstIndexId=${posts.value[0]._id}`
+    );
+    posts.value = prevPagePosts.data.posts;
+    pages.value = prevPagePosts.data.pages;
+    currPage.value = newPage;
   }
+  // currPage.value = newPage;
+  // const nextPagePosts = await axios.get(
+  //   `/posts/feed?pageNumber=${currPage.value}`
+  // );
+  // posts.value = nextPagePosts.data.posts;
+  // pages.value = nextPagePosts.data.pages;
+};
+
+const showNewestPosts = async () => {
+  currPage.value = currPage.value - 1;
+  const nextPagePosts = await axios.get(`/posts/feed`);
+  posts.value = nextPagePosts.data.posts;
+  pages.value = nextPagePosts.data.pages;
 };
 </script>
 

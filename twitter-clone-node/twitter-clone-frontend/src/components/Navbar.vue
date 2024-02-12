@@ -87,8 +87,8 @@ watch(login, (newLogin, oldLogin) => {
 });
 
 const findUser = async (input) => {
-  if (input) {
-    const users = await axios.get(`/users/search/${input}`);
+  if (input.trim()) {
+    const users = await axios.get(`/users/search/${input.trim()}`);
     searchUsers.value = users.data;
   } else {
     searchUsers.value = null;
