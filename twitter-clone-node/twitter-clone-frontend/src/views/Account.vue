@@ -106,20 +106,44 @@ onMounted(async () => {
     const dbUser = await axios.get(`/users/${username}`);
     user.value = dbUser.data;
     await axios.get(`/posts/byUser/${user.value._id}`).then((res) => {
-      posts.value = res.data?.filter(
-        (el) => el.type === "post" && el.disabled === false
-      );
-      replies.value = res.data?.filter(
-        (el) => el.type === "comment" && el.disabled === false
-      );
+      posts.value = res.data.posts?.filter((el) => el.disabled === false);
+      replies.value = res.data.comments?.filter((el) => el.disabled === false);
     });
     isFollowed.value = follows.value?.includes(user.value._id);
     isBlocked.value = blocked.value?.includes(user.value._id);
+    window.onscroll = function () {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        if (showPostType.value === "post") {
+          loadPagePosts();
+        }
+        if (showPostType.value === "comment") {
+          loadPageComments();
+        }
+      }
+    };
   } catch (err) {
     console.log(err.response);
     alert(err.response.data.message);
   }
 });
+
+const loadPagePosts = async () => {
+  const nextPagePosts = await axios.get(
+    `/posts/byUser/${user.value._id}?lastPostIndexId=${
+      posts.value[posts.value.length - 1]._id
+    }`
+  );
+  posts.value = posts.value.concat(nextPagePosts.data.posts);
+};
+
+const loadPageComments = async () => {
+  const nextPageComments = await axios.get(
+    `/posts/byUser/${user.value._id}?lastCommentIndexId=${
+      replies.value[replies.value.length - 1]._id
+    }`
+  );
+  replies.value = replies.value.concat(nextPageComments.data.comments);
+};
 
 const addPost = (post) => {
   posts.value = [post, ...posts.value];

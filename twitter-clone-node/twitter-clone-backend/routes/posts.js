@@ -177,10 +177,27 @@ function handlePostsRoute(io) {
 
   router.get("/byUser/:userId", requireAuth, async (req, res) => {
     const userId = req.params.userId;
+    const lastPostIndexId = req.query.lastPostIndexId;
+    const lastCommentIndexId = req.query.lastCommentIndexId;
     try {
-      const posts = await Post.find({ author: userId }).sort({ date: -1 });
+      const posts = await Post.find({ author: userId, type: "post" }).sort({
+        date: -1,
+      });
+      const comments = await Post.find({
+        author: userId,
+        type: "comment",
+      }).sort({ date: -1 });
+      const lastPostIndex =
+        posts.findIndex((post) => post._id == lastPostIndexId) + 1;
+      const lastCommentIndex =
+        comments.findIndex((post) => post._id == lastCommentIndexId) + 1;
+      console.log(lastPostIndex);
+      console.log(lastCommentIndex);
 
-      res.json(posts);
+      res.json({
+        posts: posts.slice(lastPostIndex, lastPostIndex + 5),
+        comments: comments.slice(lastCommentIndex, lastCommentIndex + 5),
+      });
     } catch (err) {
       console.log(err.message);
       res.status(500).json({
