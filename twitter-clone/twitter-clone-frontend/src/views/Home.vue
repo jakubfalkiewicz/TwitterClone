@@ -81,7 +81,7 @@ onMounted(async () => {
   const homeQuery = await axios.get(query);
   posts.value = homeQuery.data.posts;
   pages.value = homeQuery.data.pages;
-    socket.off("newPost");
+  socket.off("newPost");
   socket.on("newPost", (newPost) => {
     if (auth.follows.includes(newPost.author._id) && newPost.type === "post") {
       incomingPosts.value.push({

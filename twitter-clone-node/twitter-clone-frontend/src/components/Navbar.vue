@@ -65,7 +65,7 @@
 </template>
 <script setup>
 import axios from "../api/axios";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import useAuthStore from "../stores/AuthStore";
 import { ref, watch } from "vue";
 import { socket } from "../socket";
@@ -73,6 +73,7 @@ import { storeToRefs } from "pinia";
 
 const auth = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 const searchUsers = ref(null);
 const showNotifications = ref(false);
 const { login } = storeToRefs(auth);
@@ -81,6 +82,12 @@ watch(login, (newLogin, oldLogin) => {
   if (newLogin) {
     socket.off(`notification_${auth.login}`);
     socket.on(`notification_${auth.login}`, (notification) => {
+      if (
+        route.fullPath.includes("/user/") &&
+        route.params.username === notification.user.login
+      ) {
+        window.location.href = route.fullPath;
+      }
       auth.addNotification(notification);
     });
   }

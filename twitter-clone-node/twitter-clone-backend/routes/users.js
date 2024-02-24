@@ -158,6 +158,7 @@ function handleUsersRoute(io) {
         const notification = await Notification.create({
           user: userBlocking._id,
           text: " has blocked you.",
+          type: "block",
           date: Date.now(),
         });
         userToBlock.notifications = [
@@ -186,6 +187,7 @@ function handleUsersRoute(io) {
         const notification = await Notification.create({
           user: userUnblocking._id,
           text: " has unblocked you.",
+          type: "unblock",
           date: Date.now(),
         });
         userToUnblock.notifications = userToUnblock.notifications = [

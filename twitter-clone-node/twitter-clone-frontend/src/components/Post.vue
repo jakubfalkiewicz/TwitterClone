@@ -73,7 +73,7 @@
             "
           >
             <i class="bi bi-chat-left-text"></i>
-            {{ post.commentsLength }}
+            {{ post.commentsLength || post.comments.length }}
           </div>
           <div
             class="post-metadata"

@@ -6,46 +6,6 @@
       :key="post._id"
       :post="post"
     ></Post>
-    <div class="page-select-container">
-      <i
-        class="bi bi-arrow-left-short"
-        v-if="currPage !== 1"
-        @click="loadPagePosts(currPage - 1)"
-      ></i>
-      <div
-        class="page-select"
-        :class="{
-          active: 1 === currPage,
-        }"
-        @click="loadPagePosts(1)"
-      >
-        1
-      </div>
-      <div
-        v-if="currPage !== 1 && currPage !== pages"
-        class="page-select"
-        :class="{
-          active: pages !== currPage && currPage !== 1,
-        }"
-      >
-        {{ currPage }}
-      </div>
-      <div
-        v-if="pages > 1"
-        :class="{
-          active: pages === currPage,
-        }"
-        class="page-select"
-        @click="loadPagePosts(pages)"
-      >
-        {{ pages }}
-      </div>
-      <i
-        class="bi bi-arrow-right-short"
-        v-if="pages > 1 && currPage !== pages"
-        @click="loadPagePosts(currPage + 1)"
-      ></i>
-    </div>
     <div
       v-if="incomingPosts.length > 0"
       class="incoming-posts"
@@ -66,18 +26,11 @@ import useAuthStore from "../stores/AuthStore";
 
 const auth = useAuthStore();
 const posts = ref(null);
-const pages = ref(1);
 const incomingPosts = ref([]);
-const currPage = ref(1);
 
 onMounted(async () => {
-  const query =
-    currPage.value > 1
-      ? `/posts/feed?pageNumber=${currPage.value}`
-      : `/posts/feed`;
-  const homeQuery = await axios.get(query);
-  posts.value = homeQuery.data.posts;
-  pages.value = homeQuery.data.pages;
+  const homeQuery = await axios.get("/posts/feed");
+  posts.value = homeQuery.data;
   socket.off("newPost");
   socket.on("newPost", (newPost) => {
     if (auth.follows.includes(newPost.author._id) && newPost.type === "post") {
@@ -87,46 +40,27 @@ onMounted(async () => {
       });
     }
   });
+  window.onscroll = function () {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+      loadPagePosts();
+    }
+  };
 });
 
-// const loadPagePosts = async (newPage) => {
-//   currPage.value = newPage;
-//   const nextPagePosts = await axios.get(
-//     `/posts/feed?pageNumber=${currPage.value}&skipNew=${incomingPosts.value.length}`
-//   );
-//   posts.value = nextPagePosts.data.posts;
-//   pages.value = nextPagePosts.data.pages;
-// };
-
-const loadPagePosts = async (newPage) => {
-  if (newPage > currPage.value) {
-    const nextPagePosts = await axios.get(
-      `/posts/feed?lastIndexId=${posts.value[posts.value.length - 1]._id}`
-    );
-    posts.value = nextPagePosts.data.posts;
-    pages.value = nextPagePosts.data.pages;
-    currPage.value = newPage;
-  } else if (newPage < currPage.value) {
-    const prevPagePosts = await axios.get(
-      `/posts/feed?firstIndexId=${posts.value[0]._id}`
-    );
-    posts.value = prevPagePosts.data.posts;
-    pages.value = prevPagePosts.data.pages;
-    currPage.value = newPage;
-  }
-  // currPage.value = newPage;
-  // const nextPagePosts = await axios.get(
-  //   `/posts/feed?pageNumber=${currPage.value}`
-  // );
-  // posts.value = nextPagePosts.data.posts;
-  // pages.value = nextPagePosts.data.pages;
+const loadPagePosts = async () => {
+  const nextPagePosts = await axios.get(
+    `/posts/feed?lastIndexId=${posts.value[posts.value.length - 1]._id}`
+  );
+  posts.value = posts.value.concat(nextPagePosts.data);
 };
 
 const showNewestPosts = async () => {
-  currPage.value = currPage.value - 1;
-  const nextPagePosts = await axios.get(`/posts/feed`);
-  posts.value = nextPagePosts.data.posts;
-  pages.value = nextPagePosts.data.pages;
+  const nextPagePosts = await axios.get(
+    `/posts/feed?loadNewest=${incomingPosts.value.length}`
+  );
+  posts.value = nextPagePosts.data.concat(posts.value);
+  incomingPosts.value = [];
+  window.scrollTo(0, 0);
 };
 </script>
 

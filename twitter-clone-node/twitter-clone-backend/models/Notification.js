@@ -3,6 +3,10 @@ const { Schema, model } = require("mongoose");
 const notificationSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   text: { type: String, required: true },
+  type: {
+    type: String,
+    enum: ["block", "unblock"],
+  },
   date: { type: Date, required: true },
 });
 

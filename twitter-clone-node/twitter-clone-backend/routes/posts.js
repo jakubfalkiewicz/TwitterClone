@@ -47,104 +47,39 @@ function handlePostsRoute(io) {
     }
   });
 
-  // router.get("/feed", requireAuth, async (req, res) => {
-  //   const userId = req.userId;
-  //   const pageNumber = req.query.pageNumber || 1;
-  //   const skipNew = req.query.skipNew || 0;
-  //   const pageSize = 5;
-  //   try {
-  //     const user = await User.findById(userId).populate("follows");
-  //     const followerIds = user.follows.map((follower) => follower._id);
-  //     const postsNumber = await Post.find({
-  //       author: { $in: followerIds },
-  //       type: "post",
-  //     });
-  //     const posts = await Post.find({
-  //       author: { $in: followerIds },
-  //       type: "post",
-  //     })
-  //       .skip((pageNumber - 1) * pageSize + parseInt(skipNew))
-  //       .limit(pageSize)
-  //       .sort({ date: -1 });
-  //     res.status(200).send({
-  //       posts: posts.filter((post) => !post.author.blocked.includes(userId)),
-  //       pages: Math.ceil(
-  //         postsNumber.filter((post) => !post.author.blocked.includes(userId))
-  //           .length / pageSize
-  //       ),
-  //     });
-  //   } catch (error) {
-  //     console.error("Error fetching tweets:", error);
-  //     res.status(500).json({ error: "Internal Server Error" });
-  //   }
-  // });
-
   router.get("/feed", requireAuth, async (req, res) => {
     const userId = req.userId;
-    const pageNumber = req.query.pageNumber || 1;
     const lastIndexId = req.query.lastIndexId;
-    const firstIndexId = req.query.firstIndexId;
-    const pageSize = 5;
+    const loadNewest = req.query.loadNewest;
     try {
       const user = await User.findById(userId).populate("follows");
       const followerIds = user.follows.map((follower) => follower._id);
-      const postsNumber = await Post.find({
-        author: { $in: followerIds },
-        type: "post",
-      });
-      if (lastIndexId) {
-        const posts = await Post.find({
-          author: { $in: followerIds },
-          type: "post",
-        }).sort({ date: -1 });
-        const lastIndex =
-          posts
-            .filter((post) => !post.author.blocked.includes(userId))
-            .findIndex((post) => post._id == lastIndexId) + 1;
-        return res.status(200).send({
-          posts: posts
-            .filter((post) => !post.author.blocked.includes(userId))
-            .slice(lastIndex, lastIndex + 5),
-          pages: Math.ceil(
-            postsNumber.filter((post) => !post.author.blocked.includes(userId))
-              .length / pageSize
-          ),
-        });
-      }
-      if (firstIndexId) {
-        const posts = await Post.find({
-          author: { $in: followerIds },
-          type: "post",
-        }).sort({ date: -1 });
-        const firstIndex =
-          posts
-            .filter((post) => !post.author.blocked.includes(userId))
-            .findIndex((post) => post._id == firstIndexId) + 1;
-        return res.status(200).send({
-          posts: posts
-            .filter((post) => !post.author.blocked.includes(userId))
-            .slice(firstIndex - 6, firstIndex - 1),
-          pages: Math.ceil(
-            postsNumber.filter((post) => !post.author.blocked.includes(userId))
-              .length / pageSize
-          ),
-        });
-      }
       const posts = await Post.find({
         author: { $in: followerIds },
         type: "post",
-      })
-        .skip((pageNumber - 1) * pageSize)
-        .sort({ date: -1 });
-      return res.status(200).send({
-        posts: posts
+      }).sort({ date: -1 });
+      const lastIndex =
+        posts
           .filter((post) => !post.author.blocked.includes(userId))
-          .slice(0, 5),
-        pages: Math.ceil(
-          postsNumber.filter((post) => !post.author.blocked.includes(userId))
-            .length / pageSize
-        ),
-      });
+          .findIndex((post) => post._id == lastIndexId) + 1;
+
+      if (loadNewest) {
+        return res
+          .status(200)
+          .send(
+            posts
+              .filter((post) => !post.author.blocked.includes(userId))
+              .slice(0, loadNewest)
+          );
+      }
+
+      return res
+        .status(200)
+        .send(
+          posts
+            .filter((post) => !post.author.blocked.includes(userId))
+            .slice(lastIndex, lastIndex + 5)
+        );
     } catch (error) {
       console.error("Error fetching tweets:", error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -164,7 +99,7 @@ function handlePostsRoute(io) {
           type: "comment",
           _id: { $nin: commentsReceived },
         })
-          .sort({ views: -1, date: 1 })
+          .sort({ date: -1 })
           .limit(sliceSize);
         if (post) {
           return res.json(post);
@@ -176,12 +111,12 @@ function handlePostsRoute(io) {
       const post = await Post.findById(postId)
         .populate({
           path: "comments",
-          options: { sort: { views: -1 }, limit: sliceSize },
+          options: { sort: { date: -1 }, limit: sliceSize },
           select: { initialPost: 0 },
         })
         .populate({
           path: "reposts",
-          options: { sort: { views: -1 } },
+          options: { sort: { date: -1 } },
           select: { initialPost: 0 },
         });
       if (!post) {

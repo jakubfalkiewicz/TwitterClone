@@ -171,6 +171,11 @@ function handlePostsRoute(io) {
     const userId = req.params.userId;
     try {
       const posts = await Post.find({ author: userId }).sort({ date: -1 });
+      posts.forEach((post) => {
+        post.commentsLength = initialPost.comments.filter(
+          (comment) => !comment.disabled
+        ).length;
+      });
 
       res.json(posts);
     } catch (err) {

@@ -67,7 +67,7 @@ onMounted(async () => {
   window.onbeforeunload = function () {
     window.scrollTo(0, 0);
   };
-  window.onscroll = function (ev) {
+  window.onscroll = function () {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
       loadComments();
     }
